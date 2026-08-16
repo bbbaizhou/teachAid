@@ -14,8 +14,7 @@ const menus = [
   { path: '/', title: '首页仪表盘', icon: 'HomeFilled' },
   { path: '/progress', title: '教学进度', icon: 'DataLine' },
   { path: '/schedule', title: '我的课程表', icon: 'Calendar' },
-  { path: '/intro', title: 'AI 课程导入', icon: 'MagicStick' },
-  { path: '/exercises', title: '习题生成', icon: 'EditPen' },
+  { path: '/ai', title: 'AI 应用', icon: 'MagicStick' },
   { path: '/prep', title: '备课整理', icon: 'FolderOpened' },
   { path: '/bank', title: '本地题库', icon: 'Collection' },
   { path: '/settings', title: '设置', icon: 'Setting' }
@@ -26,7 +25,7 @@ const tabs = [
   { path: '/', title: '首页', icon: 'HomeFilled' },
   { path: '/progress', title: '进度', icon: 'DataLine' },
   { path: '/schedule', title: '课表', icon: 'Calendar' },
-  { path: '/intro', title: 'AI', icon: 'MagicStick' }
+  { path: '/ai', title: 'AI', icon: 'MagicStick' }
 ];
 
 const activeMenu = computed(() => route.path);

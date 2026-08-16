@@ -41,11 +41,12 @@ onMounted(async () => {
     <!-- 顶部快捷入口 -->
     <el-row :gutter="14" class="quick-row">
       <el-col :xs="12" :sm="8" :md="4" v-for="m in [
-        { path: '/progress', title: '登记教学进度', icon: 'DataLine', color: '#409eff' },
-        { path: '/schedule', title: '查看我的课表', icon: 'Calendar', color: '#67c23a' },
-        { path: '/intro', title: '生成课程导入', icon: 'MagicStick', color: '#e6a23c' },
-        { path: '/exercises', title: '生成练习题', icon: 'EditPen', color: '#f56c6c' },
-        { path: '/prep', title: '整理备课资料', icon: 'FolderOpened', color: '#909399' }
+        { path: '/progress', title: '登记教学进度', icon: 'DataLine', color: '#3b82f6' },
+        { path: '/schedule', title: '查看我的课表', icon: 'Calendar', color: '#22c55e' },
+        { path: '/ai?tab=intro', title: '生成课程导入', icon: 'MagicStick', color: '#f59e0b' },
+        { path: '/ai?tab=exercises', title: '生成练习题', icon: 'EditPen', color: '#ef4444' },
+        { path: '/ai?tab=sizheng', title: '课程思政设计', icon: 'Collection', color: '#8b5cf6' },
+        { path: '/prep', title: '整理备课资料', icon: 'FolderOpened', color: '#64748b' }
       ]" :key="m.path">
         <div class="quick-card pointer" @click="router.push(m.path)">
           <span class="quick-icon" :style="{ background: m.color + '1a', color: m.color }">

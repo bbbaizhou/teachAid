@@ -60,6 +60,7 @@ export const deleteAttachment = (id) => http.delete(`/prep/attachments/${id}`);
 export const getAiStatus = () => http.get('/ai/status');
 export const testAi = () => http.post('/ai/test', {});
 export const generateIntro = (data) => http.post('/ai/intro', data);
+export const generateSizheng = (data) => http.post('/ai/sizheng', data);
 export const generateExercises = (data) => http.post('/ai/exercises', data);
 export const getAiRecords = (type) => http.get('/ai/records', { params: { type } });
 export const getAiRecord = (id) => http.get(`/ai/records/${id}`);

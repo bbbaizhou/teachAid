@@ -75,6 +75,7 @@ export const deleteAttachment = (...a) => impl().deleteAttachment(...a);
 export const getAiStatus = (...a) => impl().getAiStatus(...a);
 export const testAi = (...a) => impl().testAi(...a);
 export const generateIntro = (...a) => impl().generateIntro(...a);
+export const generateSizheng = (...a) => impl().generateSizheng(...a);
 export const generateExercises = (...a) => impl().generateExercises(...a);
 export const getAiRecords = (...a) => impl().getAiRecords(...a);
 export const getAiRecord = (...a) => impl().getAiRecord(...a);

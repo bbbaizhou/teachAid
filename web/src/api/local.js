@@ -4,7 +4,7 @@ import {
   dbAll, dbGet, dbPut, dbDel, dbClear, now, seedIfNeeded
 } from '../db/browser-db.js';
 import {
-  chat, hasApiKeyLocal, buildIntroPrompt, buildExercisePrompt, parseExercises, testConnectionLocal
+  chat, hasApiKeyLocal, buildIntroPrompt, buildExercisePrompt, buildSizhengPrompt, parseExercises, testConnectionLocal
 } from '../utils/aiPrompts.js';
 import { progressMarkdown, exercisesMarkdown, downloadText, downloadDocx } from '../utils/exportMd.js';
 
@@ -433,6 +433,21 @@ export async function generateIntro(data) {
   return { id, content };
 }
 
+export async function generateSizheng(data) {
+  const { chapter_id, title, knowledge_points, major, theme = 'comprehensive', withScript = false, extra = '' } = data;
+  if (!chapter_id && !title) throw new Error('请选择章节');
+  const chapter = chapter_id ? await dbGet('chapters', chapter_id) : null;
+  const chapterTitle = chapter?.title || title;
+  const kps = chapter?.knowledge_points || knowledge_points || '';
+  const messages = buildSizhengPrompt({ chapterTitle, knowledgePoints: kps, major, theme, withScript, extra });
+  const content = (await chat(messages, { temperature: 0.8 })).trim();
+  const id = await dbPut('ai_records', {
+    type: 'sz', chapter_id: chapter?.id || null, major: major || '', style: theme,
+    config: JSON.stringify({ withScript, extra }), content, created_at: now()
+  });
+  return { id, content };
+}
+
 export async function generateExercises(data) {
   const { chapter_id, title, knowledge_points, major = '', counts = {}, types = [], extra = '', use_mistakes = false } = data;
   if (!chapter_id && !title) throw new Error('请选择章节');
@@ -490,13 +505,15 @@ export async function saveRecordToPrep(id, data) {
     : '';
   const defaultTitle = record.type === 'intro'
     ? `课堂导入：${chapterTitle || (record.major ? `面向${record.major}` : '')}`
-    : '练习题组';
+    : record.type === 'sz'
+      ? `课程思政设计：${chapterTitle || (record.major ? `面向${record.major}` : '')}`
+      : '练习题组';
   const newId = await createPrepItem({
     chapter_id: chapter_id || record.chapter_id || null,
     knowledge_point,
     title: title || defaultTitle,
     content,
-    tags: tags || '导入文案'
+    tags: tags || '课程思政'
   });
   return { id: newId.id };
 }

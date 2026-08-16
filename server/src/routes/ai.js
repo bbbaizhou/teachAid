@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { db, now } from '../db.js';
 import {
-  chat, buildIntroPrompt, buildExercisePrompt, parseExercises, hasApiKey, testConnection
+  chat, buildIntroPrompt, buildExercisePrompt, buildSizhengPrompt, parseExercises, hasApiKey, testConnection
 } from '../services/aiService.js';
 
 const router = Router();
@@ -33,6 +33,25 @@ router.post('/intro', async (req, res) => {
     const content = (await chat(messages, { temperature: 0.8 })).trim();
     const info = db.prepare('INSERT INTO ai_records (type, chapter_id, major, style, config, content) VALUES (?, ?, ?, ?, ?, ?)')
       .run('intro', chapter?.id || null, major || '', style, JSON.stringify({ extra }), content);
+    res.json({ id: Number(info.lastInsertRowid), content });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/** 生成课程思政融入方案 */
+router.post('/sizheng', async (req, res) => {
+  try {
+    const { chapter_id, major, theme = 'comprehensive', withScript = false, extra = '', title, knowledge_points } = req.body;
+    if (!chapter_id && !title) return res.status(400).json({ error: '请选择章节' });
+    let chapter = null;
+    if (chapter_id) chapter = db.prepare('SELECT * FROM chapters WHERE id = ?').get(chapter_id);
+    const chapterTitle = chapter?.title || title;
+    const kps = chapter?.knowledge_points || knowledge_points || '';
+    const messages = buildSizhengPrompt({ chapterTitle, knowledgePoints: kps, major, theme, withScript, extra });
+    const content = (await chat(messages, { temperature: 0.8 })).trim();
+    const info = db.prepare('INSERT INTO ai_records (type, chapter_id, major, style, config, content) VALUES (?, ?, ?, ?, ?, ?)')
+      .run('sz', chapter?.id || null, major || '', theme, JSON.stringify({ withScript, extra }), content);
     res.json({ id: Number(info.lastInsertRowid), content });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -93,12 +112,14 @@ router.post('/records/:id/save-to-prep', (req, res) => {
     : '';
   const defaultTitle = record.type === 'intro'
     ? `课堂导入：${chapterTitle || (record.major ? `面向${record.major}` : '')}`
-    : '练习题组';
+    : record.type === 'sz'
+      ? `课程思政设计：${chapterTitle || (record.major ? `面向${record.major}` : '')}`
+      : '练习题组';
   const info = db.prepare(`
     INSERT INTO prep_items (chapter_id, knowledge_point, title, content, tags, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(chapter_id || record.chapter_id || null, knowledge_point,
-    title || defaultTitle, content, tags || '导入文案', now());
+    title || defaultTitle, content, tags || '课程思政', now());
   res.json({ id: Number(info.lastInsertRowid) });
 });
 
