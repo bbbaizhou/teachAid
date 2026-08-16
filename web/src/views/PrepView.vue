@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import {
   getCourses, getCourseDetail, getPrepItems, getPrepItem, createPrepItem, updatePrepItem, deletePrepItem,
-  uploadPrepFile, addAttachment, deleteAttachment, packageChapterUrl
+  uploadPrepFile, addAttachment, deleteAttachment, packageChapter
 } from '../api/index.js';
 import MathText from '../components/MathText.vue';
 import MarkdownView from '../components/MarkdownView.vue';
@@ -175,16 +175,11 @@ async function removeAtt(a) {
   attachments.value = attachments.value.filter((x) => x.id !== a.id);
 }
 
-function download(url) {
-  const a = document.createElement('a');
-  a.href = url; a.click();
-}
-
-function packageCurrent() {
+async function packageCurrent() {
   const chapterId = activeNode.value === 'root' || activeNode.value === 'all' ? null : Number(activeNode.value);
   const ch = chapters.value.find((c) => c.id === chapterId);
   if (!chapterId) return ElMessage.warning('请先在左侧选择要打包的章节');
-  download(packageChapterUrl(chapterId));
+  await packageChapter(chapterId);
   ElMessage.success(`正在打包「${ch.title}」的全部资料`);
 }
 

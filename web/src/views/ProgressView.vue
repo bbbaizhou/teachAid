@@ -5,7 +5,7 @@ import {
   getCourses, createCourse, updateCourse, deleteCourse, getCourseDetail,
   createClass, updateClass, deleteClass, createChapter, updateChapter, deleteChapter,
   getProgressBoard, logProgress, updateProgress, getProgressLogs,
-  exportProgressUrl
+  exportProgress
 } from '../api/index.js';
 import { STATUS_LABEL } from '../utils/math.js';
 import { useIsMobile } from '../composables/useIsMobile.js';
@@ -216,11 +216,6 @@ async function showLogs(row) {
 function statusType(s) {
   return s === 'completed' ? 'success' : s === 'in_progress' ? 'warning' : 'info';
 }
-
-function download(url, name) {
-  const a = document.createElement('a');
-  a.href = url; a.download = name; a.click();
-}
 </script>
 
 <template>
@@ -238,7 +233,7 @@ function download(url, name) {
         <el-button v-if="board" @click="classDialog = true">班级管理</el-button>
         <el-button v-if="board" @click="chapterDialog = true">章节管理</el-button>
         <div class="spacer"></div>
-        <el-dropdown v-if="board" @command="(f) => download(exportProgressUrl(courseId, f), '')">
+        <el-dropdown v-if="board" @command="(f) => exportProgress(courseId, f)">
           <el-button type="success">导出进度档案<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
           <template #dropdown>
             <el-dropdown-menu>

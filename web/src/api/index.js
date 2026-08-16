@@ -1,85 +1,109 @@
-import axios from 'axios';
+// 双模式 API 分发器：
+// - 服务模式（http）：Express + SQLite 后端（本机/局域网）
+// - 浏览器模式（local）：IndexedDB 本地存储（GitHub Pages 静态部署）
+// 启动时自动探测：能连上 /api/health 用服务模式，否则用浏览器模式。
+import * as httpApi from './http.js';
+import * as localApi from './local.js';
 
-const http = axios.create({ baseURL: '/api', timeout: 120000 });
+let mode = null; // 'http' | 'local'
 
-http.interceptors.response.use(
-  (res) => res.data,
-  (err) => {
-    const msg = err.response?.data?.error || err.message || '请求失败';
-    return Promise.reject(new Error(msg));
+export async function initApi() {
+  let httpOk = false;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 1500);
+    const res = await fetch('/api/health', { signal: ctrl.signal });
+    clearTimeout(timer);
+    httpOk = res.ok;
+  } catch {
+    httpOk = false;
   }
-);
+  mode = httpOk ? 'http' : 'local';
+  if (mode === 'local') {
+    await localApi.initLocal();
+  } else {
+    await httpApi.initHttp();
+  }
+  return mode;
+}
+
+export const isLocalMode = () => mode === 'local';
+export const getMode = () => mode;
+
+const impl = () => (mode === 'http' ? httpApi : localApi);
 
 // ---------- 课程 / 班级 / 章节 ----------
-export const getCourses = () => http.get('/courses');
-export const createCourse = (data) => http.post('/courses', data);
-export const updateCourse = (id, data) => http.put(`/courses/${id}`, data);
-export const deleteCourse = (id) => http.delete(`/courses/${id}`);
-export const getCourseDetail = (id) => http.get(`/courses/${id}`);
-export const getClasses = () => http.get('/classes');
-export const createClass = (data) => http.post('/classes', data);
-export const updateClass = (id, data) => http.put(`/classes/${id}`, data);
-export const deleteClass = (id) => http.delete(`/classes/${id}`);
-export const createChapter = (data) => http.post('/chapters', data);
-export const updateChapter = (id, data) => http.put(`/chapters/${id}`, data);
-export const deleteChapter = (id) => http.delete(`/chapters/${id}`);
+export const getCourses = (...a) => impl().getCourses(...a);
+export const createCourse = (...a) => impl().createCourse(...a);
+export const updateCourse = (...a) => impl().updateCourse(...a);
+export const deleteCourse = (...a) => impl().deleteCourse(...a);
+export const getCourseDetail = (...a) => impl().getCourseDetail(...a);
+export const getClasses = (...a) => impl().getClasses(...a);
+export const createClass = (...a) => impl().createClass(...a);
+export const updateClass = (...a) => impl().updateClass(...a);
+export const deleteClass = (...a) => impl().deleteClass(...a);
+export const createChapter = (...a) => impl().createChapter(...a);
+export const updateChapter = (...a) => impl().updateChapter(...a);
+export const deleteChapter = (...a) => impl().deleteChapter(...a);
 
 // ---------- 进度 ----------
-export const getProgressBoard = (courseId) => http.get('/progress/board', { params: { course_id: courseId } });
-export const logProgress = (data) => http.post('/progress/log', data);
-export const updateProgress = (id, data) => http.put(`/progress/${id}`, data);
-export const getProgressLogs = (id) => http.get(`/progress/${id}/logs`);
+export const getProgressBoard = (...a) => impl().getProgressBoard(...a);
+export const logProgress = (...a) => impl().logProgress(...a);
+export const updateProgress = (...a) => impl().updateProgress(...a);
+export const getProgressLogs = (...a) => impl().getProgressLogs(...a);
 
 // ---------- 课表 ----------
-export const getSchedule = (params) => http.get('/schedule', { params });
-export const createSchedule = (data) => http.post('/schedule', data);
-export const updateSchedule = (id, data) => http.put(`/schedule/${id}`, data);
-export const setScheduleStatus = (id, data) => http.post(`/schedule/${id}/status`, data);
-export const deleteSchedule = (id) => http.delete(`/schedule/${id}`);
-export const getTodaySchedule = () => http.get('/schedule/today');
-export const getSectionTimes = () => http.get('/schedule/section-times');
+export const getSchedule = (...a) => impl().getSchedule(...a);
+export const createSchedule = (...a) => impl().createSchedule(...a);
+export const updateSchedule = (...a) => impl().updateSchedule(...a);
+export const setScheduleStatus = (...a) => impl().setScheduleStatus(...a);
+export const deleteSchedule = (...a) => impl().deleteSchedule(...a);
+export const getTodaySchedule = (...a) => impl().getTodaySchedule(...a);
+export const getSectionTimes = (...a) => impl().getSectionTimes(...a);
 
 // ---------- 备课 ----------
-export const getPrepItems = (params) => http.get('/prep', { params });
-export const getPrepItem = (id) => http.get(`/prep/${id}`);
-export const createPrepItem = (data) => http.post('/prep', data);
-export const updatePrepItem = (id, data) => http.put(`/prep/${id}`, data);
-export const deletePrepItem = (id) => http.delete(`/prep/${id}`);
-export const uploadPrepFile = (file) => {
-  const fd = new FormData();
-  fd.append('file', file);
-  return http.post('/prep/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-};
-export const addAttachment = (prepId, data) => http.post(`/prep/${prepId}/attachments`, data);
-export const deleteAttachment = (id) => http.delete(`/prep/attachments/${id}`);
-export const packageChapterUrl = (chapterId) => `/api/prep/package/${chapterId}`;
+export const getPrepItems = (...a) => impl().getPrepItems(...a);
+export const getPrepItem = (...a) => impl().getPrepItem(...a);
+export const createPrepItem = (...a) => impl().createPrepItem(...a);
+export const updatePrepItem = (...a) => impl().updatePrepItem(...a);
+export const deletePrepItem = (...a) => impl().deletePrepItem(...a);
+export const uploadPrepFile = (...a) => impl().uploadPrepFile(...a);
+export const addAttachment = (...a) => impl().addAttachment(...a);
+export const deleteAttachment = (...a) => impl().deleteAttachment(...a);
 
 // ---------- AI ----------
-export const getAiStatus = () => http.get('/ai/status');
-export const generateIntro = (data) => http.post('/ai/intro', data);
-export const generateExercises = (data) => http.post('/ai/exercises', data);
-export const getAiRecords = (type) => http.get('/ai/records', { params: { type } });
-export const getAiRecord = (id) => http.get(`/ai/records/${id}`);
-export const saveRecordToPrep = (id, data) => http.post(`/ai/records/${id}/save-to-prep`, data);
+export const getAiStatus = (...a) => impl().getAiStatus(...a);
+export const testAi = (...a) => impl().testAi(...a);
+export const generateIntro = (...a) => impl().generateIntro(...a);
+export const generateExercises = (...a) => impl().generateExercises(...a);
+export const getAiRecords = (...a) => impl().getAiRecords(...a);
+export const getAiRecord = (...a) => impl().getAiRecord(...a);
+export const saveRecordToPrep = (...a) => impl().saveRecordToPrep(...a);
 
 // ---------- 题库 ----------
-export const getBankItems = (params) => http.get('/bank', { params });
-export const createBankItem = (data) => http.post('/bank', data);
-export const updateBankItem = (id, data) => http.put(`/bank/${id}`, data);
-export const deleteBankItem = (id) => http.delete(`/bank/${id}`);
-export const importBankItems = (items) => http.post('/bank/import', { items });
+export const getBankItems = (...a) => impl().getBankItems(...a);
+export const createBankItem = (...a) => impl().createBankItem(...a);
+export const updateBankItem = (...a) => impl().updateBankItem(...a);
+export const deleteBankItem = (...a) => impl().deleteBankItem(...a);
+export const importBankItems = (...a) => impl().importBankItems(...a);
 
 // ---------- 设置 ----------
-export const getSettings = () => http.get('/settings');
-export const saveSettings = (data) => http.put('/settings', data);
-export const getNetworkInfo = () => http.get('/settings/network');
+export const getSettings = (...a) => impl().getSettings(...a);
+export const saveSettings = (...a) => impl().saveSettings(...a);
+export const getNetworkInfo = (...a) => impl().getNetworkInfo(...a);
 
-// ---------- 导出 / 备份 ----------
-export const exportProgressUrl = (courseId, format) => `/api/export/progress?course_id=${courseId}&format=${format}`;
-export const exportExercisesUrl = (recordId, format) => `/api/export/exercises/${recordId}?format=${format}`;
-export const createBackup = () => http.post('/export/backup');
-export const getBackups = () => http.get('/export/backups');
-export const deleteBackup = (name) => http.delete(`/export/backups/${name}`);
-export const backupDownloadUrl = (name) => `/api/export/backups/${encodeURIComponent(name)}`;
+// ---------- 导出 ----------
+export const exportProgress = (...a) => impl().exportProgress(...a);
+export const exportExercises = (...a) => impl().exportExercises(...a);
+export const packageChapter = (...a) => impl().packageChapter(...a);
 
-export default http;
+// ---------- 模式专属：备份 ----------
+// 服务模式：服务器 zip 备份；浏览器模式：JSON 导出/导入
+export const createBackup = (...a) => httpApi.createBackup(...a);
+export const getBackups = (...a) => httpApi.getBackups(...a);
+export const deleteBackup = (...a) => httpApi.deleteBackup(...a);
+export const backupDownloadUrl = (...a) => httpApi.backupDownloadUrl(...a);
+export const backupExport = (...a) => localApi.backupExport(...a);
+export const backupImport = (...a) => localApi.backupImport(...a);
+
+export default impl;

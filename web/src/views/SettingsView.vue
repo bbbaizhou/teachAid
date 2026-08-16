@@ -2,9 +2,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import {
-  getSettings, saveSettings, createBackup, getBackups, deleteBackup, backupDownloadUrl, getNetworkInfo
+  getSettings, saveSettings, testAi,
+  createBackup, getBackups, deleteBackup, backupDownloadUrl, getNetworkInfo,
+  backupExport, backupImport, isLocalMode
 } from '../api/index.js';
-import http from '../api/index.js';
+
+const localMode = isLocalMode();
 
 const settings = ref({ ai: {}, majors: [], sectionTimes: [], app: {} });
 const aiForm = ref({ provider: 'deepseek', apiKey: '', model: 'deepseek-chat', baseUrl: 'https://api.deepseek.com', temperature: 0.8 });
@@ -20,6 +23,8 @@ const DEFAULT_SECTION_TIMES = JSON.stringify([
 const testing = ref(false);
 const backingUp = ref(false);
 const backups = ref([]);
+const importFile = ref(null);
+const importing = ref(false);
 
 async function load() {
   const s = await getSettings();
@@ -33,10 +38,12 @@ async function load() {
   };
   majors.value = [...(s.majors || [])];
   sectionTimesText.value = JSON.stringify(s.sectionTimes || [], null, 2);
-  backups.value = await getBackups();
-  try {
-    network.value = await getNetworkInfo();
-  } catch { /* 忽略 */ }
+  if (!localMode) {
+    backups.value = await getBackups();
+    try {
+      network.value = await getNetworkInfo();
+    } catch { /* 忽略 */ }
+  }
 }
 
 const accessUrls = computed(() =>
@@ -50,13 +57,12 @@ async function saveAi() {
   ElMessage.success('AI 设置已保存');
 }
 
-async function testAi() {
+async function runTestAi() {
   testing.value = true;
   try {
-    if (!aiForm.value.apiKey.trim()) {
-      // 没有输入新 key 时先用已保存的配置测试
-    }
-    const res = await http.post('/ai/test', {});
+    // 若输入了新 Key，先保存再测试
+    if (aiForm.value.apiKey.trim()) await saveAi();
+    const res = await testAi();
     ElMessage.success(`连接成功：${res || '正常'}`);
   } catch (e) {
     ElMessage.error(e.message);
@@ -111,6 +117,34 @@ async function removeBackup(b) {
   backups.value = await getBackups();
 }
 
+async function doLocalExport() {
+  backingUp.value = true;
+  try {
+    await backupExport();
+    ElMessage.success('已导出备份文件（JSON）');
+  } catch (e) {
+    ElMessage.error(e.message);
+  } finally {
+    backingUp.value = false;
+  }
+}
+
+async function onImportFile(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  importing.value = true;
+  try {
+    await backupImport(file);
+    ElMessage.success('数据已恢复，正在刷新界面…');
+    setTimeout(() => location.reload(), 800);
+  } catch (err) {
+    ElMessage.error('恢复失败：' + err.message);
+  } finally {
+    importing.value = false;
+    e.target.value = '';
+  }
+}
+
 function download(url) {
   const a = document.createElement('a');
   a.href = url; a.click();
@@ -156,38 +190,51 @@ onMounted(load);
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="saveAi">保存 AI 设置</el-button>
-            <el-button :loading="testing" @click="testAi">测试连接</el-button>
+            <el-button :loading="testing" @click="runTestAi">测试连接</el-button>
           </el-form-item>
         </el-form>
-        <el-alert type="info" :closable="false" title="Key 仅保存在本机数据库中，不会上传任何云端服务。申请地址：https://platform.deepseek.com" />
+        <el-alert type="info" :closable="false"
+          :title="localMode ? '浏览器模式下 Key 仅保存在本浏览器中（本机数据不跨设备同步）。申请地址：https://platform.deepseek.com' : 'Key 仅保存在本机数据库中，不会上传任何云端服务。申请地址：https://platform.deepseek.com'" />
       </div>
 
       <!-- 备份 -->
       <div class="page-card">
-        <h3 class="page-title">💾 数据备份（本地）</h3>
-        <div style="margin-bottom: 10px;">
-          <el-button type="success" :loading="backingUp" @click="doBackup">立即备份</el-button>
-          <span class="muted" style="margin-left: 10px">每天首次启动服务时会自动备份一次；数据库 + 附件全部打包为 zip</span>
-        </div>
-        <el-table :data="backups" size="small" border>
-          <el-table-column prop="name" label="备份文件" />
-          <el-table-column label="大小" width="90">
-            <template #default="{ row }">{{ (row.size / 1024 / 1024).toFixed(2) }} MB</template>
-          </el-table-column>
-          <el-table-column prop="mtime" label="时间" width="150" />
-          <el-table-column label="操作" width="130">
-            <template #default="{ row }">
-              <el-button size="small" text type="primary" @click="download(backupDownloadUrl(row.name))">下载</el-button>
-              <el-button size="small" text type="danger" @click="removeBackup(row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <template v-if="localMode">
+          <h3 class="page-title">💾 数据备份（本浏览器）</h3>
+          <div style="margin-bottom: 10px;">
+            <el-button type="success" :loading="backingUp" @click="doLocalExport">导出备份（JSON 文件）</el-button>
+            <el-button :loading="importing" @click="importFile.click()">从备份恢复</el-button>
+            <input ref="importFile" type="file" accept=".json" style="display:none" @change="onImportFile" />
+          </div>
+          <el-alert type="info" :closable="false"
+            title="浏览器模式的数据存在当前浏览器（IndexedDB）中，换设备/换浏览器不互通。请定期「导出备份」并妥善保存 JSON 文件；换设备后在设置页「从备份恢复」即可迁移。" />
+        </template>
+        <template v-else>
+          <h3 class="page-title">💾 数据备份（本地）</h3>
+          <div style="margin-bottom: 10px;">
+            <el-button type="success" :loading="backingUp" @click="doBackup">立即备份</el-button>
+            <span class="muted" style="margin-left: 10px">每天首次启动服务时会自动备份一次；数据库 + 附件全部打包为 zip</span>
+          </div>
+          <el-table :data="backups" size="small" border>
+            <el-table-column prop="name" label="备份文件" />
+            <el-table-column label="大小" width="90">
+              <template #default="{ row }">{{ (row.size / 1024 / 1024).toFixed(2) }} MB</template>
+            </el-table-column>
+            <el-table-column prop="mtime" label="时间" width="150" />
+            <el-table-column label="操作" width="130">
+              <template #default="{ row }">
+                <el-button size="small" text type="primary" @click="download(backupDownloadUrl(row.name))">下载</el-button>
+                <el-button size="small" text type="danger" @click="removeBackup(row)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
       </div>
     </el-col>
 
     <el-col :xs="24" :md="12">
-      <!-- 手机访问 -->
-      <div class="page-card" style="margin-bottom: 14px;">
+      <!-- 手机访问（仅服务模式） -->
+      <div v-if="!localMode" class="page-card" style="margin-bottom: 14px;">
         <h3 class="page-title">📱 手机访问本系统</h3>
         <p class="muted" style="margin-top: 0">让手机与电脑连接同一个 WiFi，然后在手机浏览器打开下面的地址（电脑需保持本系统运行）：</p>
         <div v-for="u in accessUrls" :key="u.addr" class="access-item">
@@ -225,8 +272,8 @@ onMounted(load);
       <div class="page-card">
         <h3 class="page-title">ℹ️ 关于</h3>
         <p style="margin: 4px 0">{{ settings.app.name }} v{{ settings.app.version }}</p>
-        <p class="muted" style="margin: 4px 0">单人本地使用 · 数据完全保存在本机 · 无需服务器</p>
-        <p class="muted" style="margin: 4px 0">数据目录：server/data/（含 teachaid.db、uploads/、backups/），复制该目录即可整体迁移</p>
+        <p class="muted" style="margin: 4px 0">单人使用 · {{ localMode ? '数据保存在当前浏览器中（GitHub Pages 版）' : '数据完全保存在本机 · 无需服务器' }}</p>
+        <p v-if="!localMode" class="muted" style="margin: 4px 0">数据目录：server/data/（含 teachaid.db、uploads/、backups/），复制该目录即可整体迁移</p>
       </div>
     </el-col>
   </el-row>

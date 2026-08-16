@@ -113,6 +113,28 @@ teachAid/
   - 想关闭自动推送：删除或重命名 `.git/hooks/post-commit`。
 - 手动推送：`git add -A && git commit -m "说明" && git push origin main`
 
+## 🌐 GitHub Pages 部署（全功能浏览器版）
+
+系统支持**双模式**运行，自动切换：
+
+| 模式 | 数据存储 | 适用场景 |
+| --- | --- | --- |
+| **服务模式** | 本机 SQLite（`server/data/`） | 本机 / 局域网访问（后端完整功能） |
+| **浏览器模式** | 当前浏览器的 IndexedDB | GitHub Pages 静态部署，任何设备打开即用 |
+
+浏览器模式说明（部署到 Pages 后默认启用）：
+- 所有数据保存在**当前浏览器的 IndexedDB** 中，不跨设备/跨浏览器互通，请定期到「设置 → 数据备份」导出 JSON 备份；
+- AI Key 在「设置」页填写，仅保存在本浏览器中；AI 生成由浏览器直连 DeepSeek；
+- 换设备后：在「设置 → 数据备份 → 从备份恢复」导入 JSON 即可迁移。
+
+### 部署步骤（已配置自动部署，仅需开启一次）
+
+1. 代码推送到 GitHub 后，Actions 会自动构建并发布到 `gh-pages` 分支（工作流 `.github/workflows/deploy.yml`）；
+2. 打开仓库 **Settings → Pages**，将 **Source** 设为 **Deploy from a branch**，分支选 **`gh-pages`**、目录 **`/ (root)`**，点 Save；
+3. 等待 1~2 分钟后访问：**`https://bbbaizhou.github.io/teachAid/`**。
+
+以后每次推送 `main` 分支代码，页面都会自动重新构建发布。
+
 ## 📝 使用提示
 
 - 数学公式用 LaTeX 语法 `$...$`（行内）/ `$$...$$`（独立），系统会自动渲染，导出 Word 时公式以 LaTeX 源码形式保留。

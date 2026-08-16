@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import {
   getCourses, getCourseDetail, getSettings, generateExercises, getAiRecords, getAiRecord,
-  importBankItems, exportExercisesUrl
+  importBankItems, exportExercises
 } from '../api/index.js';
 import MathText from '../components/MathText.vue';
 import { DIFF_LABEL, DIFF_TYPE, TYPE_LABEL } from '../utils/math.js';
@@ -136,11 +136,6 @@ async function saveAll() {
   ElMessage.success(`已全部存入本地题库（${items.length} 道）`);
 }
 
-function download(url) {
-  const a = document.createElement('a');
-  a.href = url; a.click();
-}
-
 onMounted(loadCourses);
 </script>
 
@@ -214,8 +209,8 @@ onMounted(loadCourses);
           <h3 class="page-title" style="margin:0">📝 生成结果</h3>
           <div class="spacer"></div>
           <template v-if="record && record.items.length">
-            <el-button @click="download(exportExercisesUrl(record.id, 'md'))">导出 Markdown</el-button>
-            <el-button type="success" @click="download(exportExercisesUrl(record.id, 'docx'))">导出 Word</el-button>
+            <el-button @click="exportExercises(record.id, 'md')">导出 Markdown</el-button>
+            <el-button type="success" @click="exportExercises(record.id, 'docx')">导出 Word</el-button>
             <el-button type="primary" @click="saveAll">全部存入题库</el-button>
           </template>
         </div>

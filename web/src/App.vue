@@ -1,11 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useIsMobile } from './composables/useIsMobile.js';
+import { getMode } from './api/index.js';
 
 const route = useRoute();
 const { isMobile } = useIsMobile();
 const drawer = ref(false);
+const mode = ref('');
 
 const menus = [
   { path: '/', title: '首页仪表盘', icon: 'HomeFilled' },
@@ -24,6 +26,10 @@ const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '
 function onSelect() {
   drawer.value = false;
 }
+
+onMounted(() => {
+  mode.value = getMode();
+});
 </script>
 
 <template>
@@ -45,6 +51,8 @@ function onSelect() {
           <el-icon :size="20"><Menu /></el-icon>
         </el-button>
         <span class="header-title">{{ route.meta.title }}</span>
+        <el-tag v-if="mode === 'local'" size="small" type="warning" class="mode-tag">浏览器模式·数据存本机浏览器</el-tag>
+        <el-tag v-else-if="mode === 'http'" size="small" type="success" class="mode-tag">服务模式</el-tag>
         <span class="header-date">{{ today }}</span>
       </el-header>
       <el-main class="main">
@@ -78,6 +86,7 @@ function onSelect() {
 .header-title { font-size: 16px; font-weight: 600; flex: 1; }
 .header-date { color: #909399; font-size: 13px; white-space: nowrap; }
 .hamburger { margin-left: -8px; }
+.mode-tag { margin-right: 8px; }
 .main { padding: 16px; overflow: auto; }
 .mobile-drawer :deep(.el-drawer__body) { padding: 0; }
 .drawer-foot { padding: 16px; text-align: center; }
