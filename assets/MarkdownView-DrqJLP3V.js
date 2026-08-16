@@ -1,0 +1,1 @@
+import{r as o}from"./math-C1RuI-e9.js";import{_ as r,e as a,f as s,v as c}from"./index-DWsrDV5C.js";const p=["innerHTML"],_={__name:"MarkdownView",props:{content:{type:String,default:""}},setup(e){const n=e,t=c(()=>o(n.content));return(d,i)=>(a(),s("div",{class:"markdown-view",innerHTML:t.value},null,8,p))}},f=r(_,[["__scopeId","data-v-a3848afd"]]);export{f as M};
