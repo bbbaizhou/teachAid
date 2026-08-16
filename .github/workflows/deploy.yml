@@ -28,6 +28,9 @@ jobs:
 
       - name: Build (relative base for subpath hosting)
         working-directory: web
+        env:
+          # 默认 AI Key 通过 GitHub Secret 注入，不进入仓库（需在仓库 Settings → Secrets 配置 DEEPSEEK_API_KEY）
+          VITE_DEFAULT_AI_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: npm run build -- --base=./
 
       - name: Deploy to gh-pages

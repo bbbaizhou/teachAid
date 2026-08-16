@@ -131,7 +131,8 @@ teachAid/
 
 1. 代码推送到 GitHub 后，Actions 会自动构建并发布到 `gh-pages` 分支（工作流 `.github/workflows/deploy.yml`）；
 2. 打开仓库 **Settings → Pages**，将 **Source** 设为 **Deploy from a branch**，分支选 **`gh-pages`**、目录 **`/ (root)`**，点 Save；
-3. 等待 1~2 分钟后访问：**`https://bbbaizhou.github.io/teachAid/`**。
+3. **（可选但推荐）配置默认 AI Key**：打开仓库 **Settings → Secrets and variables → Actions**，新建仓库 Secret，名称填 **`DEEPSEEK_API_KEY`**，值填你的 DeepSeek Key。之后每次部署，网页版会自动预置该 Key（Key 只经过构建注入，不进入公开仓库）；
+4. 等待 1~2 分钟后访问：**`https://bbbaizhou.github.io/teachAid/`**。
 
 以后每次推送 `main` 分支代码，页面都会自动重新构建发布。
 
