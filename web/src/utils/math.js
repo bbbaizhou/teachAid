@@ -1,6 +1,19 @@
 import katex from 'katex';
 import { marked } from 'marked';
 
+/** 含换行/环境的多行公式应使用独立（display）模式渲染 */
+function shouldDisplay(tex) {
+  return /\\\\|\\begin|\\end|\n/.test(tex);
+}
+
+function renderOne(tex, display) {
+  try {
+    return katex.renderToString(tex, { displayMode: display, throwOnError: false, strict: false });
+  } catch {
+    return tex;
+  }
+}
+
 /** 渲染一段纯文本中的 LaTeX 数学公式（$...$ 行内、$$...$$ 独立） */
 export function renderMath(text = '') {
   if (!text) return '';
@@ -8,11 +21,7 @@ export function renderMath(text = '') {
   return safe.replace(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g, (m, d, i) => {
     const tex = (d || i).trim();
     if (!tex) return m;
-    try {
-      return katex.renderToString(tex, { displayMode: !!d, throwOnError: false });
-    } catch {
-      return m;
-    }
+    return renderOne(tex, !!d || shouldDisplay(tex));
   });
 }
 
@@ -32,13 +41,7 @@ export function renderMarkdown(md = '') {
     html = escaped;
   }
   for (const t of tokens) {
-    let kh = '';
-    try {
-      kh = katex.renderToString(t.tex, { displayMode: t.display, throwOnError: false });
-    } catch {
-      kh = t.tex;
-    }
-    html = html.split(t.id).join(kh);
+    html = html.split(t.id).join(renderOne(t.tex, t.display || shouldDisplay(t.tex)));
   }
   return html;
 }

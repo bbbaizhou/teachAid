@@ -88,12 +88,17 @@ router.post('/records/:id/save-to-prep', (req, res) => {
   const content = record.type === 'exercise'
     ? (() => { try { return JSON.stringify(JSON.parse(record.content), null, 2); } catch { return record.content; } })()
     : record.content;
+  const chapterTitle = record.chapter_id
+    ? db.prepare('SELECT title FROM chapters WHERE id = ?').get(record.chapter_id)?.title || ''
+    : '';
+  const defaultTitle = record.type === 'intro'
+    ? `课堂导入：${chapterTitle || (record.major ? `面向${record.major}` : '')}`
+    : '练习题组';
   const info = db.prepare(`
     INSERT INTO prep_items (chapter_id, knowledge_point, title, content, tags, updated_at)
     VALUES (?, ?, ?, ?, ?, ?)
   `).run(chapter_id || record.chapter_id || null, knowledge_point,
-    title || (record.type === 'intro' ? `课堂导入：${record.chapter_id ? '' : ''}` : '练习题组'),
-    content, tags || '导入文案', now());
+    title || defaultTitle, content, tags || '导入文案', now());
   res.json({ id: Number(info.lastInsertRowid) });
 });
 
