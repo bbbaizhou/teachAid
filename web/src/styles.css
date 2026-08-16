@@ -1,0 +1,8 @@
+html, body, #app { height: 100%; margin: 0; }
+body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f5f7fa; }
+.page-card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.page-title { font-size: 18px; font-weight: 600; margin: 0 0 14px; }
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.toolbar .spacer { flex: 1; }
+.muted { color: #909399; font-size: 12px; }
+.pointer { cursor: pointer; }
