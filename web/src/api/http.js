@@ -104,3 +104,18 @@ export const createBackup = () => http.post('/export/backup');
 export const getBackups = () => http.get('/export/backups');
 export const deleteBackup = (name) => http.delete(`/export/backups/${name}`);
 export const backupDownloadUrl = (name) => `/api/export/backups/${encodeURIComponent(name)}`;
+
+// ---------- 完整数据导出 / 导入（服务模式） ----------
+export async function exportData() {
+  const a = document.createElement('a');
+  a.href = '/api/export/data';
+  a.click();
+  return { ok: true };
+}
+
+export async function importData(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await http.post('/export/import', fd, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 300000 });
+  return res;
+}

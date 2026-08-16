@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus';
 import {
   getSettings, saveSettings, testAi,
   createBackup, getBackups, deleteBackup, backupDownloadUrl, getNetworkInfo,
-  backupExport, backupImport, isLocalMode
+  exportData, importData, isLocalMode
 } from '../api/index.js';
 
 const localMode = isLocalMode();
@@ -117,11 +117,11 @@ async function removeBackup(b) {
   backups.value = await getBackups();
 }
 
-async function doLocalExport() {
+async function doExportData() {
   backingUp.value = true;
   try {
-    await backupExport();
-    ElMessage.success('已导出备份文件（JSON）');
+    await exportData();
+    ElMessage.success('已导出完整数据备份文件（JSON）');
   } catch (e) {
     ElMessage.error(e.message);
   } finally {
@@ -134,9 +134,9 @@ async function onImportFile(e) {
   if (!file) return;
   importing.value = true;
   try {
-    await backupImport(file);
-    ElMessage.success('数据已恢复，正在刷新界面…');
-    setTimeout(() => location.reload(), 800);
+    const r = await importData(file);
+    ElMessage.success(`数据已完整恢复（${r.counts ? Object.values(r.counts).reduce((s, n) => s + n, 0) + ' 条记录' : '完成'}），正在刷新…`);
+    setTimeout(() => location.reload(), 900);
   } catch (err) {
     ElMessage.error('恢复失败：' + err.message);
   } finally {
@@ -197,23 +197,25 @@ onMounted(load);
           :title="localMode ? '浏览器模式下 Key 仅保存在本浏览器中（本机数据不跨设备同步）。申请地址：https://platform.deepseek.com' : 'Key 仅保存在本机数据库中，不会上传任何云端服务。申请地址：https://platform.deepseek.com'" />
       </div>
 
-      <!-- 备份 -->
+      <!-- 数据备份与恢复（统一 JSON 完整导出/导入） -->
       <div class="page-card">
-        <template v-if="localMode">
-          <h3 class="page-title">💾 数据备份（本浏览器）</h3>
+        <h3 class="page-title">💾 数据备份与恢复</h3>
+        <div style="margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <el-button type="success" :loading="backingUp" @click="doExportData">📤 导出完整数据</el-button>
+          <el-button type="warning" :loading="importing" @click="importFile.click()">📥 从备份恢复</el-button>
+          <input ref="importFile" type="file" accept=".json,application/json" style="display:none" @change="onImportFile" />
+        </div>
+        <el-alert type="info" :closable="false"
+          title="导出的 JSON 文件包含全部数据（课程/班级/进度/课表/备课与附件/题库/AI记录/设置）。恢复时会完整还原，且本机版与网页版的备份文件可以互通使用。" />
+        <el-alert v-if="!localMode" style="margin-top: 8px" type="warning" :closable="false"
+          title="注意：恢复会覆盖当前全部数据（不可撤销），请先「导出完整数据」留底。" />
+
+        <!-- 服务模式：服务器 zip 备份列表（附加） -->
+        <template v-if="!localMode">
+          <el-divider />
           <div style="margin-bottom: 10px;">
-            <el-button type="success" :loading="backingUp" @click="doLocalExport">导出备份（JSON 文件）</el-button>
-            <el-button :loading="importing" @click="importFile.click()">从备份恢复</el-button>
-            <input ref="importFile" type="file" accept=".json" style="display:none" @change="onImportFile" />
-          </div>
-          <el-alert type="info" :closable="false"
-            title="浏览器模式的数据存在当前浏览器（IndexedDB）中，换设备/换浏览器不互通。请定期「导出备份」并妥善保存 JSON 文件；换设备后在设置页「从备份恢复」即可迁移。" />
-        </template>
-        <template v-else>
-          <h3 class="page-title">💾 数据备份（本地）</h3>
-          <div style="margin-bottom: 10px;">
-            <el-button type="success" :loading="backingUp" @click="doBackup">立即备份</el-button>
-            <span class="muted" style="margin-left: 10px">每天首次启动服务时会自动备份一次；数据库 + 附件全部打包为 zip</span>
+            <el-button size="small" @click="doBackup">立即生成服务器 zip 备份</el-button>
+            <span class="muted" style="margin-left: 8px">每天首次启动服务自动备份一次（数据库+附件整体打包）</span>
           </div>
           <el-table :data="backups" size="small" border>
             <el-table-column prop="name" label="备份文件" />

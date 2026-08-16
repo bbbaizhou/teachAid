@@ -107,4 +107,8 @@ export const backupDownloadUrl = (...a) => httpApi.backupDownloadUrl(...a);
 export const backupExport = (...a) => localApi.backupExport(...a);
 export const backupImport = (...a) => localApi.backupImport(...a);
 
+// 统一接口：两种模式均可导出完整数据 / 从备份恢复
+export const exportData = (...a) => impl().exportData(...a);
+export const importData = (...a) => impl().importData(...a);
+
 export default impl;

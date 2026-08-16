@@ -661,7 +661,15 @@ export async function exportExercises(recordId, format = 'md') {
   return { ok: true };
 }
 
-// ---------- 备份：导出/导入 JSON ----------
+// ---------- 备份：导出/导入 JSON（统一命名，与 http 模式对齐） ----------
+export async function exportData() {
+  return backupExport();
+}
+
+export async function importData(file) {
+  return backupImport(file);
+}
+
 export async function backupExport() {
   const dump = {};
   for (const s of ['courses', 'classes', 'chapters', 'progress', 'progress_logs', 'schedule_entries', 'prep_items', 'prep_attachments', 'ai_records', 'question_bank']) {
@@ -699,7 +707,8 @@ export async function backupImport(file) {
   for (const s of Object.keys(parsed.data)) {
     for (const row of parsed.data[s] || []) {
       const r = { ...row };
-      delete r.id; // 让 id 重新自增
+      // 保留原 id：保证外键（course_id/chapter_id 等）在恢复后仍然一致；
+      // IndexedDB 插入显式 id 会自动更新自增计数器。
       if (r.blobBase64) {
         r.blob = base64ToBlob(r.blobBase64);
         delete r.blobBase64;
