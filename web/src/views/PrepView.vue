@@ -305,14 +305,15 @@ onMounted(loadCourses);
 <style scoped>
 .tree-node { font-size: 13px; }
 .prep-card {
-  border: 1px solid #ebeef5; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px;
-  transition: box-shadow .15s;
+  border: 1px solid var(--ta-border); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px;
+  background: var(--ta-surface); box-shadow: var(--ta-sh-1);
+  transition: box-shadow .2s ease;
 }
-.prep-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.prep-card:hover { box-shadow: var(--ta-sh-2); }
 .prep-head { display: flex; align-items: center; gap: 4px; }
-.prep-title { font-size: 15px; }
+.prep-title { font-size: 15px; color: var(--ta-text); }
 .prep-meta { margin: 6px 0; }
-.prep-excerpt { color: #606266; font-size: 13px; }
+.prep-excerpt { color: var(--ta-text-2); font-size: 13px; }
 .preview-box { border: 1px solid #e4e7ed; border-radius: 6px; padding: 10px 14px; min-height: 200px; background: #fafafa; }
 .attach-item { display: inline-flex; align-items: center; gap: 6px; margin: 6px 12px 0 0; padding: 4px 10px; background: #f4f4f5; border-radius: 6px; }
 .attach-name { color: #409eff; }

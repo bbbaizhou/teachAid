@@ -106,10 +106,14 @@ onMounted(() => {
 .logo { font-size: 16px; font-weight: 700; padding: 18px 16px; color: #409eff; border-bottom: 1px solid #f0f0f0; }
 .menu { border-right: none; flex: 1; }
 .header {
-  background: #fff; border-bottom: 1px solid #e4e7ed;
-  display: flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--ta-border);
+  display: flex; align-items: center; gap: 8px;
+  position: sticky; top: 0; z-index: 50;
 }
-.header-title { font-size: 16px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-title { font-size: 16px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px; }
 .header-date { color: #909399; font-size: 13px; white-space: nowrap; }
 .mode-tag { margin-right: 8px; }
 .mode-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -117,20 +121,31 @@ onMounted(() => {
 .mode-dot.local { background: #e6a23c; }
 .main { padding: 16px; overflow: auto; }
 
-/* 底部标签栏 */
+/* 底部标签栏（玻璃拟态 + 活性药丸） */
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
-  background: #fff; border-top: 1px solid #e4e7ed;
+  background: rgba(255, 255, 255, .88);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border-top: 1px solid rgba(238, 240, 244, .9);
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -2px 10px rgba(0,0,0,.05);
 }
 .tab {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 7px 0 5px; color: #909399; font-size: 11px; gap: 2px;
-  -webkit-tap-highlight-color: transparent;
+  padding: 8px 0 7px; color: var(--ta-text-3); font-size: 11px; gap: 2px;
+  position: relative; transition: color .2s ease;
 }
-.tab.active { color: #409eff; font-weight: 600; }
+.tab .el-icon { transition: transform .2s ease; }
+.tab.active { color: var(--ta-primary); font-weight: 600; }
+.tab.active .el-icon { transform: translateY(-1px) scale(1.08); }
+.tab.active::before {
+  content: ''; position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+  width: 44px; height: 26px; border-radius: 13px;
+  background: var(--el-color-primary-light-9);
+  z-index: -1;
+}
+.tab:active .el-icon { transform: scale(.9); }
 
 .mobile-drawer :deep(.el-drawer__body) { padding: 0; }
 .drawer-foot { padding: 16px; text-align: center; }

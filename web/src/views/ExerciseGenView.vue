@@ -258,13 +258,17 @@ onMounted(loadCourses);
 <style scoped>
 .count-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .count-label { width: 56px; font-size: 13px; }
-.diff-head { display: flex; align-items: center; gap: 10px; margin: 18px 0 10px; }
-.q-card { margin-bottom: 12px; border-left: 3px solid #e4e7ed; }
-.q-card.basic { border-left-color: #409eff; }
-.q-card.intermediate { border-left-color: #e6a23c; }
-.q-card.advanced { border-left-color: #f56c6c; }
-.q-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.q-no { color: #909399; font-size: 13px; }
-.q-body { font-size: 14px; line-height: 1.8; }
-.q-answer { margin-top: 6px; font-size: 13.5px; line-height: 1.8; }
+.diff-head { display: flex; align-items: center; gap: 10px; margin: 22px 0 12px; }
+.diff-head .el-tag { border-radius: 8px; padding: 4px 12px; }
+.q-card {
+  margin-bottom: 14px; border-left: 4px solid var(--ta-border);
+  border-radius: 16px !important; box-shadow: var(--ta-sh-1) !important;
+}
+.q-card.basic { border-left-color: var(--ta-primary); }
+.q-card.intermediate { border-left-color: var(--ta-warning); }
+.q-card.advanced { border-left-color: var(--ta-danger); }
+.q-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.q-no { color: var(--ta-text-3); font-size: 13px; }
+.q-body { font-size: 14px; line-height: 1.8; color: var(--ta-text); }
+.q-answer { margin-top: 8px; font-size: 13.5px; line-height: 1.8; }
 </style>

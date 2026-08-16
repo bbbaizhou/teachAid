@@ -114,7 +114,7 @@ const sheet = await evaluate(`(() => {
   return { bottom: Math.round(r.bottom), vh: window.innerHeight, top: Math.round(r.top), radius: getComputedStyle(d).borderRadius };
 })()`);
 check('弹窗为底部弹层', !!sheet && sheet.bottom >= sheet.vh - 2 && sheet.top > 0, JSON.stringify(sheet));
-check('弹窗顶部圆角', !!sheet && sheet.radius.includes('18px'));
+check('弹窗顶部圆角', !!sheet && sheet.radius.includes('22px'), sheet?.radius);
 // 关闭弹窗（esc）
 await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape' });
 await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape' });

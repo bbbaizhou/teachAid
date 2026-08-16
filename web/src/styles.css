@@ -1,25 +1,133 @@
+/* ============================================================
+   高数教学辅助系统 · 全局设计系统
+   依据 Mobile App UI Design 规范：
+   - 8-Point 间距网格（4/8/12/16/24/32）
+   - 60-30-10 配色（中性 60% / 辅助 30% / 强调 10%）
+   - 圆角 Token（sm 8 / md 12 / lg 16 / xl 20）
+   - 阴影 Elevation Token
+   - 触摸目标 ≥44px、交互间距 ≥8px
+   ============================================================ */
+
+:root {
+  /* —— 颜色 Token —— */
+  --ta-bg: #f5f6f9;                 /* 应用背景（柔和中性） */
+  --ta-surface: #ffffff;            /* 卡片表面 */
+  --ta-text: #1e2532;               /* 主文本（高对比） */
+  --ta-text-2: #5b6472;             /* 次级文本 */
+  --ta-text-3: #98a0ad;             /* 辅助/占位文本 */
+  --ta-border: #eef0f4;             /* 分隔线 */
+  --ta-primary: #3b82f6;
+  --ta-primary-grad: linear-gradient(135deg, #4f8ff7 0%, #3b6ef0 100%);
+  --ta-success: #22c55e;
+  --ta-warning: #f59e0b;
+  --ta-danger: #ef4444;
+  --ta-info: #64748b;
+
+  /* —— 圆角 Token —— */
+  --ta-r-sm: 8px;
+  --ta-r-md: 12px;
+  --ta-r-lg: 16px;
+  --ta-r-xl: 20px;
+  --ta-r-full: 999px;
+
+  /* —— 阴影 Token —— */
+  --ta-sh-1: 0 1px 2px rgba(23, 32, 51, .04);
+  --ta-sh-2: 0 2px 10px rgba(23, 32, 51, .06);
+  --ta-sh-3: 0 12px 32px rgba(23, 32, 51, .10);
+
+  /* —— 间距 Token —— */
+  --ta-sp-1: 4px;
+  --ta-sp-2: 8px;
+  --ta-sp-3: 12px;
+  --ta-sp-4: 16px;
+  --ta-sp-5: 24px;
+  --ta-sp-6: 32px;
+
+  /* —— Element Plus 主题色对齐 —— */
+  --el-color-primary: #3b82f6;
+  --el-color-primary-light-3: #6ea1f8;
+  --el-color-primary-light-5: #97bcfb;
+  --el-color-primary-light-7: #c1d8fc;
+  --el-color-primary-light-8: #d5e4fd;
+  --el-color-primary-light-9: #eaf1fe;
+  --el-color-primary-dark-2: #2f6ad0;
+  --el-color-success: #22c55e;
+  --el-color-warning: #f59e0b;
+  --el-color-danger: #ef4444;
+  --el-border-radius-base: 10px;
+  --el-card-border-radius: 16px;
+}
+
 html, body, #app { height: 100%; margin: 0; }
-body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f5f7fa; }
-.page-card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-.page-title { font-size: 18px; font-weight: 600; margin: 0 0 14px; }
-.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+body {
+  font-family: 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', -apple-system, sans-serif;
+  background: var(--ta-bg);
+  color: var(--ta-text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 页面容器与卡片 ---------- */
+.page-card {
+  background: var(--ta-surface);
+  border-radius: var(--ta-r-lg);
+  padding: var(--ta-sp-5);
+  box-shadow: var(--ta-sh-1);
+  border: 1px solid var(--ta-border);
+  transition: box-shadow .25s ease;
+}
+.page-card:hover { box-shadow: var(--ta-sh-2); }
+.page-title { font-size: 18px; font-weight: 700; margin: 0 0 16px; letter-spacing: .2px; }
+.toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 .toolbar .spacer { flex: 1; }
-.muted { color: #909399; font-size: 12px; }
+.muted { color: var(--ta-text-3); font-size: 12px; }
 .pointer { cursor: pointer; }
 
-/* 表格横滚容器（移动端使用） */
+/* 表格横滚容器 */
 .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ---------- Element Plus 全局润色 ---------- */
+.el-button { border-radius: 10px; font-weight: 500; }
+.el-button--primary {
+  background: var(--ta-primary-grad);
+  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, .28);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.el-button--primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, .35); }
+.el-button--primary:active { transform: translateY(0); }
+.el-button--primary.is-disabled { background: var(--el-color-primary-light-5); }
+
+.el-card { border-radius: var(--ta-r-lg) !important; border-color: var(--ta-border) !important; box-shadow: var(--ta-sh-1) !important; }
+.el-input__wrapper, .el-textarea__inner { border-radius: 10px; }
+.el-input__wrapper { box-shadow: 0 0 0 1px var(--ta-border) inset; }
+.el-input__wrapper.is-focus { box-shadow: 0 0 0 1px var(--ta-primary) inset; }
+
+.el-tag { border-radius: 6px; font-weight: 500; }
+.el-progress-bar__inner {
+  background: var(--ta-primary-grad);
+  border-radius: var(--ta-r-full);
+}
+.el-table { --el-table-border-color: var(--ta-border); --el-table-header-bg-color: #f8f9fc; --el-table-header-text-color: var(--ta-text-2); border-radius: var(--ta-r-md); }
+.el-table th.el-table__cell { font-weight: 600; }
+.el-table .el-table__inner-wrapper::before { display: none; }
+
+/* 分割线更柔和 */
+.el-divider { border-color: var(--ta-border); }
 
 /* ---------- 移动端适配 ---------- */
 @media (max-width: 767px) {
-  .page-card { padding: 12px; border-radius: 6px; }
-  .el-main { padding: 10px 10px 64px !important; }
-  .page-title { font-size: 16px; margin-bottom: 10px; }
-  .toolbar { gap: 8px; margin-bottom: 10px; }
-  .el-header { padding: 0 10px !important; }
+  /* 呼吸感：屏幕边距 16px、卡片间距 14px */
+  .el-main { padding: 16px 16px calc(84px + env(safe-area-inset-bottom)) !important; }
+  .page-card { padding: 16px; border-radius: 18px; margin-bottom: 14px; box-shadow: var(--ta-sh-1); }
+  .page-title { font-size: 16.5px; margin-bottom: 12px; }
+  .toolbar { gap: 8px; margin-bottom: 12px; }
+  .el-header { padding: 0 16px !important; height: 52px !important; }
   .header-date { display: none; }
 
-  /* 弹窗 → 底部弹层（Bottom Sheet） */
+  /* 弹窗 → 底部弹层（更大圆角、带毛玻璃背板） */
+  .el-overlay { backdrop-filter: blur(6px); background-color: rgba(15, 23, 42, .35) !important; }
   .el-overlay-dialog {
     display: flex !important;
     align-items: flex-end;
@@ -31,29 +139,31 @@ body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    border-radius: 18px 18px 0 0 !important;
+    border-radius: 22px 22px 0 0 !important;
     max-height: 88vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    box-shadow: 0 -8px 40px rgba(15, 23, 42, .18);
   }
-  .el-dialog__header { padding: 16px 16px 8px !important; flex-shrink: 0; }
-  .el-dialog__body { padding: 8px 16px !important; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .el-dialog__footer { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) !important; flex-shrink: 0; }
-  .el-dialog.is-fullscreen { border-radius: 0 !important; }
-  .el-message-box { width: 88% !important; max-width: 88% !important; border-radius: 14px !important; }
-  .el-drawer { --el-drawer-size: 84% !important; --el-drawer-width: 84% !important; width: 84% !important; max-width: 84% !important; }
+  .el-dialog__header { padding: 18px 18px 10px !important; flex-shrink: 0; }
+  .el-dialog__header .el-dialog__title { font-size: 16px; font-weight: 700; }
+  .el-dialog__body { padding: 10px 18px !important; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .el-dialog__footer { padding: 12px 18px calc(14px + env(safe-area-inset-bottom)) !important; flex-shrink: 0; }
+  .el-message-box { width: 88% !important; max-width: 88% !important; border-radius: 16px !important; }
+  .el-drawer { --el-drawer-size: 84% !important; --el-drawer-width: 84% !important; width: 84% !important; max-width: 84% !important; border-radius: 0 20px 20px 0 !important; }
 
-  /* 输入控件：16px 防止 iOS 聚焦自动放大 */
+  /* 输入控件：16px 防 iOS 聚焦放大，更大的内边距 */
   .el-input__inner, .el-textarea__inner { font-size: 16px !important; }
+  .el-input__wrapper { padding: 4px 12px; }
   .el-button { -webkit-tap-highlight-color: transparent; }
-  .el-radio-group.weekdays { display: flex; flex-wrap: wrap; row-gap: 6px; }
+  .el-radio-group.weekdays { display: flex; flex-wrap: wrap; row-gap: 8px; }
 
-  /* 表格在移动端改为紧凑横滚 */
+  /* 表格紧凑化 */
   .el-table { font-size: 12.5px; }
   .el-table .cell { padding: 0 6px; }
 
-  /* 移动端触控反馈 */
-  .pointer, .quick-card, .m-ch-row, .entry { -webkit-tap-highlight-color: transparent; }
-  .m-ch-row:active, .quick-card:active, .entry:active { opacity: .7; }
+  /* 触控反馈 */
+  .pointer, .quick-card, .m-ch-row, .entry, .list-entry, .tab { -webkit-tap-highlight-color: transparent; }
+  .quick-card:active, .m-ch-row:active, .entry:active, .list-entry:active, .tab:active { transform: scale(.97); opacity: .85; transition: transform .12s ease; }
 }

@@ -224,12 +224,13 @@ onMounted(loadCourses);
 </template>
 
 <style scoped>
-.style-list { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.style-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 .style-item {
-  border: 1px solid #e4e7ed; border-radius: 6px; padding: 8px 10px;
-  display: flex; flex-direction: column; gap: 2px;
+  border: 1px solid var(--ta-border); border-radius: 12px; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 3px;
+  background: var(--ta-surface); transition: all .2s ease;
 }
-.style-item.active { border-color: #409eff; background: #ecf5ff; }
+.style-item.active { border-color: var(--ta-primary); background: var(--el-color-primary-light-9); box-shadow: 0 4px 12px rgba(59,130,246,.12); }
 .result-box { min-height: 220px; }
 .result-content { line-height: 1.9; font-size: 14px; white-space: pre-wrap; }
 .result-meta { margin-bottom: 8px; }
