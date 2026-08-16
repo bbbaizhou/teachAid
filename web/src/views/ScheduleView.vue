@@ -6,6 +6,10 @@ import {
   getTodaySchedule, getSectionTimes
 } from '../api/index.js';
 import { WEEK_LABEL } from '../utils/math.js';
+import { useIsMobile } from '../composables/useIsMobile.js';
+
+const { isMobile } = useIsMobile();
+const viewMode = ref('week'); // 移动端：week | list
 
 const classes = ref([]);
 const entries = ref([]);
@@ -14,6 +18,16 @@ const filterClassId = ref(null);
 const todayData = ref({ entries: [], today: '' });
 const remindOn = ref(false);
 const notifiedIds = new Set();
+
+/** 移动端列表视图：按星期分组 */
+const groupedByWeekday = computed(() => {
+  const g = WEEK_LABEL.map((label, i) => ({ weekday: i, label, items: [] }));
+  for (const e of entries.value) {
+    const bucket = g.find((x) => x.weekday === e.weekday);
+    if (bucket) bucket.items.push(e);
+  }
+  return g.filter((x) => x.items.length);
+});
 
 const MAX_SECTION = 12;
 
@@ -182,12 +196,40 @@ onUnmounted(() => { if (timer) clearInterval(timer); });
           <el-option v-for="c in classes" :key="c.id" :value="c.id" :label="`${c.name}（${c.major || '专业未填'}）`" />
         </el-select>
         <el-button type="primary" @click="openAdd(todayWeekday, Math.max(1, curSection || 1))">＋ 添加课程</el-button>
-        <span class="muted">点击格子中的课程卡片可编辑 / 调课 / 停课</span>
+        <div class="spacer"></div>
+        <el-radio-group v-if="isMobile" v-model="viewMode" size="small">
+          <el-radio-button value="week">周视图</el-radio-button>
+          <el-radio-button value="list">列表</el-radio-button>
+        </el-radio-group>
+        <span v-if="!isMobile" class="muted">点击格子中的课程卡片可编辑 / 调课 / 停课</span>
+      </div>
+    </div>
+
+    <!-- 移动端：列表视图 -->
+    <div v-if="isMobile && viewMode === 'list'" class="page-card">
+      <el-empty v-if="!groupedByWeekday.length" description="暂无课程，点上方「添加课程」录入吧" />
+      <div v-for="g in groupedByWeekday" :key="g.weekday" class="day-group">
+        <div class="day-head">
+          <b>{{ g.label }}</b>
+          <span class="muted">{{ g.items.length }} 节</span>
+        </div>
+        <div v-for="e in g.items" :key="e.id" class="list-entry" @click="openEdit(e)">
+          <div class="list-entry-left">
+            <div class="list-sec">第{{ e.start_section }}-{{ e.end_section }}节</div>
+            <el-tag size="small" :type="statusTagType(e.status)">{{ statusLabel(e.status) }}</el-tag>
+          </div>
+          <div class="list-entry-main">
+            <b>{{ e.class_name }}</b>
+            <div class="muted">{{ e.course_name }} · {{ e.location || '—' }} · 第{{ e.weeks || '?' }}周</div>
+            <div v-if="e.note" class="entry-note">{{ e.note }}</div>
+          </div>
+          <el-icon class="list-arrow" color="#c0c4cc"><ArrowRight /></el-icon>
+        </div>
       </div>
     </div>
 
     <!-- 周视图网格 -->
-    <div class="page-card">
+    <div v-if="!isMobile || viewMode === 'week'" class="page-card">
       <div class="table-scroll">
         <el-table :data="sections" border size="small" style="min-width: 900px; width: 100%">
         <el-table-column label="节次 / 时间" width="110" fixed>
@@ -281,4 +323,22 @@ onUnmounted(() => { if (timer) clearInterval(timer); });
 .entry-actions { display: none; position: absolute; right: 2px; top: 2px; background: #fff; border: 1px solid #e4e7ed; border-radius: 4px; }
 .entry:hover .entry-actions { display: flex; }
 .contin { height: 2px; background: repeating-linear-gradient(90deg, #409eff 0 6px, transparent 6px 12px); margin: 1px 0; }
+
+/* 移动端列表视图 */
+.day-group { margin-bottom: 14px; }
+.day-head { display: flex; align-items: baseline; gap: 8px; padding: 4px 2px 8px; }
+.list-entry {
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid #ebeef5; border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
+  background: #fff;
+}
+.list-entry-left { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 64px; }
+.list-sec {
+  background: #ecf5ff; color: #409eff; border-radius: 8px;
+  padding: 4px 8px; font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.list-entry-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.list-entry-main b { font-size: 14px; }
+.entry-note { color: #e6a23c; font-size: 12px; }
+.list-arrow { flex-shrink: 0; }
 </style>

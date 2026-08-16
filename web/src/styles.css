@@ -13,18 +13,47 @@ body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f
 /* ---------- 移动端适配 ---------- */
 @media (max-width: 767px) {
   .page-card { padding: 12px; border-radius: 6px; }
-  .el-main { padding: 10px !important; }
+  .el-main { padding: 10px 10px 64px !important; }
   .page-title { font-size: 16px; margin-bottom: 10px; }
   .toolbar { gap: 8px; margin-bottom: 10px; }
   .el-header { padding: 0 10px !important; }
   .header-date { display: none; }
-  /* 弹窗 / 消息框 / 抽屉全屏化 */
-  .el-dialog { --el-dialog-width: 92% !important; width: 92% !important; max-width: 92% !important; }
-  .el-message-box { width: 88% !important; max-width: 88% !important; }
-  .el-drawer { --el-drawer-size: 88% !important; --el-drawer-width: 88% !important; width: 88% !important; max-width: 88% !important; }
-  /* 输入控件加大触控 */
-  .el-input__inner, .el-textarea__inner { font-size: 15px; }
+
+  /* 弹窗 → 底部弹层（Bottom Sheet） */
+  .el-overlay-dialog {
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 !important;
+  }
+  .el-dialog {
+    --el-dialog-width: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 18px 18px 0 0 !important;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .el-dialog__header { padding: 16px 16px 8px !important; flex-shrink: 0; }
+  .el-dialog__body { padding: 8px 16px !important; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .el-dialog__footer { padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) !important; flex-shrink: 0; }
+  .el-dialog.is-fullscreen { border-radius: 0 !important; }
+  .el-message-box { width: 88% !important; max-width: 88% !important; border-radius: 14px !important; }
+  .el-drawer { --el-drawer-size: 84% !important; --el-drawer-width: 84% !important; width: 84% !important; max-width: 84% !important; }
+
+  /* 输入控件：16px 防止 iOS 聚焦自动放大 */
+  .el-input__inner, .el-textarea__inner { font-size: 16px !important; }
   .el-button { -webkit-tap-highlight-color: transparent; }
-  /* 课表星期选择换行 */
   .el-radio-group.weekdays { display: flex; flex-wrap: wrap; row-gap: 6px; }
+
+  /* 表格在移动端改为紧凑横滚 */
+  .el-table { font-size: 12.5px; }
+  .el-table .cell { padding: 0 6px; }
+
+  /* 移动端触控反馈 */
+  .pointer, .quick-card, .m-ch-row, .entry { -webkit-tap-highlight-color: transparent; }
+  .m-ch-row:active, .quick-card:active, .entry:active { opacity: .7; }
 }

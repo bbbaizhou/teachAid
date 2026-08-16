@@ -1,10 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useIsMobile } from './composables/useIsMobile.js';
 import { getMode } from './api/index.js';
 
 const route = useRoute();
+const router = useRouter();
 const { isMobile } = useIsMobile();
 const drawer = ref(false);
 const mode = ref('');
@@ -20,11 +21,26 @@ const menus = [
   { path: '/settings', title: '设置', icon: 'Setting' }
 ];
 
+// 底部标签栏（移动端）
+const tabs = [
+  { path: '/', title: '首页', icon: 'HomeFilled' },
+  { path: '/progress', title: '进度', icon: 'DataLine' },
+  { path: '/schedule', title: '课表', icon: 'Calendar' },
+  { path: '/intro', title: 'AI', icon: 'MagicStick' }
+];
+
 const activeMenu = computed(() => route.path);
+const activeTab = computed(() => tabs.some((t) => t.path === route.path) ? route.path : '');
+
 const today = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
 function onSelect() {
   drawer.value = false;
+}
+
+function onTab(path) {
+  if (path === 'more') { drawer.value = true; return; }
+  router.push(path);
 }
 
 onMounted(() => {
@@ -47,21 +63,31 @@ onMounted(() => {
 
     <el-container>
       <el-header class="header">
-        <el-button v-if="isMobile" class="hamburger" text circle @click="drawer = true" aria-label="打开菜单">
-          <el-icon :size="20"><Menu /></el-icon>
-        </el-button>
         <span class="header-title">{{ route.meta.title }}</span>
-        <el-tag v-if="mode === 'local'" size="small" type="warning" class="mode-tag">浏览器模式·数据存本机浏览器</el-tag>
-        <el-tag v-else-if="mode === 'http'" size="small" type="success" class="mode-tag">服务模式</el-tag>
+        <el-tag v-if="mode === 'local' && !isMobile" size="small" type="warning" class="mode-tag">浏览器模式·数据存本机浏览器</el-tag>
+        <el-tag v-else-if="mode === 'http' && !isMobile" size="small" type="success" class="mode-tag">服务模式</el-tag>
+        <span v-if="mode" class="mode-dot" :class="mode" :title="mode === 'local' ? '浏览器模式·数据存本机浏览器' : '服务模式'"></span>
         <span class="header-date">{{ today }}</span>
       </el-header>
       <el-main class="main">
         <router-view />
       </el-main>
     </el-container>
+
+    <!-- 移动端底部标签栏 -->
+    <nav v-if="isMobile" class="bottom-nav">
+      <div v-for="t in tabs" :key="t.path" class="tab" :class="{ active: activeTab === t.path }" @click="onTab(t.path)">
+        <el-icon :size="20"><component :is="t.icon" /></el-icon>
+        <span>{{ t.title }}</span>
+      </div>
+      <div class="tab" :class="{ active: drawer }" @click="onTab('more')">
+        <el-icon :size="20"><Menu /></el-icon>
+        <span>更多</span>
+      </div>
+    </nav>
   </el-container>
 
-  <!-- 移动端抽屉导航 -->
+  <!-- 移动端抽屉导航（更多） -->
   <el-drawer v-model="drawer" direction="ltr" size="240px" :with-header="false" class="mobile-drawer">
     <div class="logo">🎓 高数教学辅助</div>
     <el-menu :default-active="activeMenu" router class="menu" @select="onSelect">
@@ -70,7 +96,7 @@ onMounted(() => {
         <span>{{ m.title }}</span>
       </el-menu-item>
     </el-menu>
-    <div class="drawer-foot muted">数据保存在本机 · 单人使用</div>
+    <div class="drawer-foot muted">{{ mode === 'local' ? '浏览器模式 · 数据存在本浏览器' : '服务模式 · 数据存本机' }}</div>
   </el-drawer>
 </template>
 
@@ -83,11 +109,29 @@ onMounted(() => {
   background: #fff; border-bottom: 1px solid #e4e7ed;
   display: flex; align-items: center; gap: 6px;
 }
-.header-title { font-size: 16px; font-weight: 600; flex: 1; }
+.header-title { font-size: 16px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .header-date { color: #909399; font-size: 13px; white-space: nowrap; }
-.hamburger { margin-left: -8px; }
 .mode-tag { margin-right: 8px; }
+.mode-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.mode-dot.http { background: #67c23a; }
+.mode-dot.local { background: #e6a23c; }
 .main { padding: 16px; overflow: auto; }
+
+/* 底部标签栏 */
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
+  background: #fff; border-top: 1px solid #e4e7ed;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2px 10px rgba(0,0,0,.05);
+}
+.tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 7px 0 5px; color: #909399; font-size: 11px; gap: 2px;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab.active { color: #409eff; font-weight: 600; }
+
 .mobile-drawer :deep(.el-drawer__body) { padding: 0; }
 .drawer-foot { padding: 16px; text-align: center; }
 </style>

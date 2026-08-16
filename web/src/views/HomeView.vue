@@ -48,34 +48,36 @@ onMounted(async () => {
         { path: '/prep', title: '整理备课资料', icon: 'FolderOpened', color: '#909399' }
       ]" :key="m.path">
         <div class="quick-card pointer" @click="router.push(m.path)">
-          <el-icon :size="26" :color="m.color"><component :is="m.icon" /></el-icon>
-          <span>{{ m.title }}</span>
+          <span class="quick-icon" :style="{ background: m.color + '1a', color: m.color }">
+            <el-icon :size="22"><component :is="m.icon" /></el-icon>
+          </span>
+          <span class="quick-title">{{ m.title }}</span>
         </div>
       </el-col>
     </el-row>
 
     <!-- 统计卡片 -->
-    <el-row :gutter="14">
+    <el-row :gutter="10">
       <el-col :xs="12" :sm="12" :md="6">
-        <el-card shadow="hover"><div class="stat">
+        <el-card shadow="hover" body-class="stat-card"><div class="stat">
           <div class="num">{{ courses.length }}</div>
           <div class="label">课程数</div>
         </div></el-card>
       </el-col>
-      <el-col :xs="24" :md="6">
-        <el-card shadow="hover"><div class="stat">
+      <el-col :xs="12" :sm="12" :md="6">
+        <el-card shadow="hover" body-class="stat-card"><div class="stat">
           <div class="num">{{ totalClasses }}</div>
           <div class="label">授课班级</div>
         </div></el-card>
       </el-col>
-      <el-col :xs="24" :md="6">
-        <el-card shadow="hover"><div class="stat">
+      <el-col :xs="12" :sm="12" :md="6">
+        <el-card shadow="hover" body-class="stat-card"><div class="stat">
           <div class="num">{{ today.entries.length }}</div>
           <div class="label">今日课程</div>
         </div></el-card>
       </el-col>
-      <el-col :xs="24" :md="6">
-        <el-card shadow="hover">
+      <el-col :xs="12" :sm="12" :md="6">
+        <el-card shadow="hover" body-class="stat-card">
           <div class="stat">
             <div class="num" :class="{ warn: !aiOk }">{{ aiOk === null ? '—' : (aiOk ? '已就绪' : '未配置') }}</div>
             <div class="label">AI 能力 <el-link type="primary" :underline="false" @click="router.push('/settings')">去配置</el-link></div>
@@ -121,20 +123,31 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.quick-row { margin-bottom: 14px; }
+.quick-row { margin-bottom: 12px; }
 .quick-card {
-  background: #fff; border-radius: 8px; padding: 18px 10px;
+  background: #fff; border-radius: 10px; padding: 14px 8px;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: transform .15s;
 }
 .quick-card:hover { transform: translateY(-3px); }
-.stat { text-align: center; padding: 6px 0; }
-.stat .num { font-size: 26px; font-weight: 700; color: #303133; }
-.stat .num.warn { color: #e6a23c; font-size: 16px; }
-.stat .label { color: #909399; margin-top: 4px; font-size: 13px; }
-.today-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0f0f0; }
+.quick-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.quick-title { font-size: 12.5px; color: #303133; text-align: center; line-height: 1.3; }
+.stat-card :deep(.el-card__body) { padding: 12px 8px; }
+.stat { text-align: center; }
+.stat .num { font-size: 24px; font-weight: 700; color: #303133; }
+.stat .num.warn { color: #e6a23c; font-size: 15px; }
+.stat .label { color: #909399; margin-top: 4px; font-size: 12.5px; }
+.today-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0f0f0; flex-wrap: wrap; }
 .today-item .time { color: #606266; font-size: 13px; white-space: nowrap; }
 .today-item .note { color: #e6a23c; font-size: 12px; }
 .course-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0f0f0; }
 .course-item b { min-width: 160px; }
+
+@media (max-width: 767px) {
+  .quick-card { padding: 12px 6px; }
+  .today-item { gap: 6px; padding: 10px 0; }
+}
 </style>

@@ -16,6 +16,19 @@ const courses = ref([]);
 const courseId = ref(null);
 const board = ref(null); // {course, classes, chapters, board}
 const loading = ref(false);
+const activeClassId = ref(null); // 移动端当前查看的班级
+
+const activeClass = computed(() => {
+  if (!board.value) return null;
+  return board.value.classes.find((c) => c.id === activeClassId.value) || board.value.classes[0] || null;
+});
+
+function classSummary(cls) {
+  if (!board.value) return '';
+  const rows = board.value.board.filter((b) => b.class_id === cls.id);
+  const done = rows.filter((r) => r.status === 'completed').length;
+  return `${done}/${rows.length} 章完成`;
+}
 
 // 课程弹窗
 const courseDialog = ref(false);
@@ -67,6 +80,10 @@ async function loadBoard() {
   loading.value = true;
   try {
     board.value = await getProgressBoard(courseId.value);
+    // 保持移动端班级选择有效
+    if (!board.value.classes.some((c) => c.id === activeClassId.value)) {
+      activeClassId.value = board.value.classes[0]?.id || null;
+    }
   } finally {
     loading.value = false;
   }
@@ -278,28 +295,32 @@ function statusType(s) {
           </el-table-column>
         </el-table>
 
-        <!-- 移动端：班级卡片视图 -->
+        <!-- 移动端：班级切换 + 单班级章节列表 -->
         <div v-else>
-          <div v-for="cls in board.classes" :key="cls.id" class="m-class-card">
-            <div class="m-class-head">
-              <b>{{ cls.name }}</b>
-              <span class="muted">{{ cls.major || '专业未填' }}</span>
-            </div>
-            <div v-for="ch in board.chapters" :key="ch.id" class="m-ch-row" @click="openReg(rowOf(cls.id, ch.id), cls, ch)">
-              <div class="m-ch-title">
-                {{ ch.title }}
-                <el-tag size="small" :type="statusType(rowOf(cls.id, ch.id)?.status || 'not_started')">
-                  {{ STATUS_LABEL[rowOf(cls.id, ch.id)?.status || 'not_started'] }}
-                </el-tag>
-              </div>
-              <el-progress :percentage="rowOf(cls.id, ch.id)?.pct || 0" :stroke-width="7"
-                :status="rowOf(cls.id, ch.id)?.status === 'completed' ? 'success' : ''" />
-              <div class="m-ch-info">
-                <span>已授 {{ rowOf(cls.id, ch.id)?.taught_hours || 0 }} / 计划 {{ ch.planned_hours }} 课时</span>
-                <span v-if="rowOf(cls.id, ch.id)?.current_point" class="muted">▶ {{ rowOf(cls.id, ch.id).current_point }}</span>
-              </div>
+          <div class="m-class-tabs">
+            <div v-for="cls in board.classes" :key="cls.id" class="m-tab pointer"
+              :class="{ active: activeClass?.id === cls.id }" @click="activeClassId = cls.id">
+              <span class="m-tab-name">{{ cls.name }}</span>
+              <span class="m-tab-sub">{{ cls.major || '专业未填' }} · {{ classSummary(cls) }}</span>
             </div>
           </div>
+          <template v-if="activeClass">
+            <div v-for="ch in board.chapters" :key="ch.id" class="m-ch-row"
+              @click="openReg(rowOf(activeClass.id, ch.id), activeClass, ch)">
+              <div class="m-ch-title">
+                {{ ch.title }}
+                <el-tag size="small" :type="statusType(rowOf(activeClass.id, ch.id)?.status || 'not_started')">
+                  {{ STATUS_LABEL[rowOf(activeClass.id, ch.id)?.status || 'not_started'] }}
+                </el-tag>
+              </div>
+              <el-progress :percentage="rowOf(activeClass.id, ch.id)?.pct || 0" :stroke-width="7"
+                :status="rowOf(activeClass.id, ch.id)?.status === 'completed' ? 'success' : ''" />
+              <div class="m-ch-info">
+                <span>已授 {{ rowOf(activeClass.id, ch.id)?.taught_hours || 0 }} / 计划 {{ ch.planned_hours }} 课时</span>
+                <span v-if="rowOf(activeClass.id, ch.id)?.current_point" class="muted">▶ {{ rowOf(activeClass.id, ch.id).current_point }}</span>
+              </div>
+            </div>
+          </template>
         </div>
       </template>
       <el-empty v-else description="请先选择或新建课程" />
@@ -449,6 +470,21 @@ function statusType(s) {
 .plus { color: #67c23a; font-weight: 600; }
 .minus { color: #f56c6c; font-weight: 600; }
 
+/* 移动端班级切换标签 */
+.m-class-tabs {
+  display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px; margin-bottom: 10px;
+}
+.m-tab {
+  flex-shrink: 0; background: #f4f4f5; border-radius: 10px; padding: 8px 14px;
+  display: flex; flex-direction: column; gap: 2px;
+  border: 1px solid transparent;
+}
+.m-tab.active { background: #ecf5ff; border-color: #409eff; }
+.m-tab-name { font-size: 13.5px; font-weight: 600; color: #303133; white-space: nowrap; }
+.m-tab.active .m-tab-name { color: #409eff; }
+.m-tab-sub { font-size: 11px; color: #909399; white-space: nowrap; }
+
 /* 移动端班级卡片 */
 .m-class-card {
   border: 1px solid #ebeef5; border-radius: 10px; padding: 12px; margin-bottom: 12px;
@@ -456,7 +492,7 @@ function statusType(s) {
 }
 .m-class-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 15px; }
 .m-ch-row {
-  border: 1px solid #f0f2f5; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;
+  border: 1px solid #f0f2f5; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
   background: #fafbfc;
 }
 .m-ch-title { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 13.5px; margin-bottom: 6px; }
