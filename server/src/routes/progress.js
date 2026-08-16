@@ -45,8 +45,8 @@ router.post('/log', (req, res) => {
       .run(newHours, note, note, now(), p.id);
     progressId = p.id;
   } else {
-    const info = db.prepare('INSERT INTO progress (class_id, chapter_id, taught_hours, status, updated_at) VALUES (?, ?, ?, \'in_progress\', ?)')
-      .run(class_id, chapter_id, Math.max(0, h), now());
+    const info = db.prepare('INSERT INTO progress (class_id, chapter_id, taught_hours, status, note, updated_at) VALUES (?, ?, ?, \'in_progress\', ?, ?)')
+      .run(class_id, chapter_id, Math.max(0, h), note, now());
     progressId = Number(info.lastInsertRowid);
   }
   db.prepare('INSERT INTO progress_logs (progress_id, hours, note) VALUES (?, ?, ?)').run(progressId, h, note);
