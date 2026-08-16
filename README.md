@@ -91,6 +91,14 @@ teachAid/
         └── utils/math.js    # LaTeX 渲染工具
 ```
 
+## 🔗 代码同步（GitHub）
+
+- 远程仓库：`git@github.com:bbbaizhou/teachAid.git`（分支 `main`）
+- **已配置自动推送**：本地每次 `git commit` 成功后，会自动同步到 GitHub（钩子文件 `.git/hooks/post-commit`）。
+  - 若某次提交时未联网，代码仍安全保存在本地，之后手动执行 `git push origin main` 即可补推。
+  - 想关闭自动推送：删除或重命名 `.git/hooks/post-commit`。
+- 手动推送：`git add -A && git commit -m "说明" && git push origin main`
+
 ## 📝 使用提示
 
 - 数学公式用 LaTeX 语法 `$...$`（行内）/ `$$...$$`（独立），系统会自动渲染，导出 Word 时公式以 LaTeX 源码形式保留。
