@@ -40,7 +40,7 @@ onMounted(async () => {
   <div v-loading="loading">
     <!-- 顶部快捷入口 -->
     <el-row :gutter="14" class="quick-row">
-      <el-col :span="4" v-for="m in [
+      <el-col :xs="12" :sm="8" :md="4" v-for="m in [
         { path: '/progress', title: '登记教学进度', icon: 'DataLine', color: '#409eff' },
         { path: '/schedule', title: '查看我的课表', icon: 'Calendar', color: '#67c23a' },
         { path: '/intro', title: '生成课程导入', icon: 'MagicStick', color: '#e6a23c' },
@@ -56,25 +56,25 @@ onMounted(async () => {
 
     <!-- 统计卡片 -->
     <el-row :gutter="14">
-      <el-col :span="6">
+      <el-col :xs="12" :sm="12" :md="6">
         <el-card shadow="hover"><div class="stat">
           <div class="num">{{ courses.length }}</div>
           <div class="label">课程数</div>
         </div></el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :md="6">
         <el-card shadow="hover"><div class="stat">
           <div class="num">{{ totalClasses }}</div>
           <div class="label">授课班级</div>
         </div></el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :md="6">
         <el-card shadow="hover"><div class="stat">
           <div class="num">{{ today.entries.length }}</div>
           <div class="label">今日课程</div>
         </div></el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :xs="24" :md="6">
         <el-card shadow="hover">
           <div class="stat">
             <div class="num" :class="{ warn: !aiOk }">{{ aiOk === null ? '—' : (aiOk ? '已就绪' : '未配置') }}</div>
@@ -86,7 +86,7 @@ onMounted(async () => {
 
     <el-row :gutter="14" style="margin-top: 14px;">
       <!-- 今日课程 -->
-      <el-col :span="14">
+      <el-col :xs="24" :md="14">
         <el-card shadow="never">
           <template #header><b>📅 今日课程（{{ today.today }}）</b></template>
           <el-empty v-if="!today.entries.length" description="今天没有课，好好休息～" :image-size="60" />
@@ -102,7 +102,7 @@ onMounted(async () => {
         </el-card>
       </el-col>
       <!-- 我的课程 -->
-      <el-col :span="10">
+      <el-col :xs="24" :md="10">
         <el-card shadow="never">
           <template #header><b>📚 我的课程</b></template>
           <el-empty v-if="!courses.length" description="还没有课程，去「教学进度」页新建吧" :image-size="60" />

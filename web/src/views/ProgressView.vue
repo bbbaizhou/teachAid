@@ -8,6 +8,9 @@ import {
   exportProgressUrl
 } from '../api/index.js';
 import { STATUS_LABEL } from '../utils/math.js';
+import { useIsMobile } from '../composables/useIsMobile.js';
+
+const { isMobile } = useIsMobile();
 
 const courses = ref([]);
 const courseId = ref(null);
@@ -225,7 +228,7 @@ function download(url, name) {
     <!-- 工具栏 -->
     <div class="page-card" style="margin-bottom: 14px;">
       <div class="toolbar">
-        <el-select v-model="courseId" placeholder="选择课程" style="width: 260px" @change="switchCourse" filterable>
+        <el-select v-model="courseId" placeholder="选择课程" :style="isMobile ? 'width:100%' : 'width:260px'" @change="switchCourse" filterable>
           <el-option v-for="c in courses" :key="c.id" :value="c.id" :label="`${c.name}${c.semester ? '（' + c.semester + '）' : ''}`" />
         </el-select>
         <el-button type="primary" @click="openCourseDialog()">＋ 新建课程</el-button>
@@ -251,8 +254,10 @@ function download(url, name) {
     <!-- 矩阵看板 -->
     <div class="page-card" v-loading="loading">
       <template v-if="board">
-        <h3 class="page-title">{{ board.course.name }} —— 班级 × 章节进度对比（点击格子登记）</h3>
-        <el-table :data="board.chapters" border size="small" style="width: 100%">
+        <h3 class="page-title">{{ board.course.name }} —— 班级 × 章节进度对比</h3>
+
+        <!-- 桌面端：矩阵表格 -->
+        <el-table v-if="!isMobile" :data="board.chapters" border size="small" style="width: 100%">
           <el-table-column label="章节 / 班级" min-width="200" fixed>
             <template #default="{ row }">
               <b>{{ row.title }}</b>
@@ -277,6 +282,30 @@ function download(url, name) {
             </template>
           </el-table-column>
         </el-table>
+
+        <!-- 移动端：班级卡片视图 -->
+        <div v-else>
+          <div v-for="cls in board.classes" :key="cls.id" class="m-class-card">
+            <div class="m-class-head">
+              <b>{{ cls.name }}</b>
+              <span class="muted">{{ cls.major || '专业未填' }}</span>
+            </div>
+            <div v-for="ch in board.chapters" :key="ch.id" class="m-ch-row" @click="openReg(rowOf(cls.id, ch.id), cls, ch)">
+              <div class="m-ch-title">
+                {{ ch.title }}
+                <el-tag size="small" :type="statusType(rowOf(cls.id, ch.id)?.status || 'not_started')">
+                  {{ STATUS_LABEL[rowOf(cls.id, ch.id)?.status || 'not_started'] }}
+                </el-tag>
+              </div>
+              <el-progress :percentage="rowOf(cls.id, ch.id)?.pct || 0" :stroke-width="7"
+                :status="rowOf(cls.id, ch.id)?.status === 'completed' ? 'success' : ''" />
+              <div class="m-ch-info">
+                <span>已授 {{ rowOf(cls.id, ch.id)?.taught_hours || 0 }} / 计划 {{ ch.planned_hours }} 课时</span>
+                <span v-if="rowOf(cls.id, ch.id)?.current_point" class="muted">▶ {{ rowOf(cls.id, ch.id).current_point }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
       <el-empty v-else description="请先选择或新建课程" />
     </div>
@@ -424,4 +453,17 @@ function download(url, name) {
 .detail-actions { margin-top: 8px; }
 .plus { color: #67c23a; font-weight: 600; }
 .minus { color: #f56c6c; font-weight: 600; }
+
+/* 移动端班级卡片 */
+.m-class-card {
+  border: 1px solid #ebeef5; border-radius: 10px; padding: 12px; margin-bottom: 12px;
+  background: #fff;
+}
+.m-class-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 15px; }
+.m-ch-row {
+  border: 1px solid #f0f2f5; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;
+  background: #fafbfc;
+}
+.m-ch-title { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 13.5px; margin-bottom: 6px; }
+.m-ch-info { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #606266; margin-top: 4px; flex-wrap: wrap; }
 </style>

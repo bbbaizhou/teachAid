@@ -194,7 +194,7 @@ onMounted(loadCourses);
 <template>
   <el-row :gutter="14">
     <!-- 左侧目录树 -->
-    <el-col :span="7">
+    <el-col :xs="24" :md="7">
       <div class="page-card">
         <h3 class="page-title">📂 课程 - 章节目录</h3>
         <el-select v-model="courseId" style="width: 100%; margin-bottom: 10px" filterable @change="loadChapters">
@@ -214,7 +214,7 @@ onMounted(loadCourses);
     </el-col>
 
     <!-- 右侧资料列表 -->
-    <el-col :span="17">
+    <el-col :xs="24" :md="17">
       <div class="page-card" v-loading="loading">
         <div class="toolbar">
           <el-input v-model="keyword" placeholder="关键词搜索（标题/内容/知识点）" clearable style="width: 240px" @keyup.enter="keyword = keyword">

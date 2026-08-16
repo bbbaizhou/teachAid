@@ -188,7 +188,8 @@ onUnmounted(() => { if (timer) clearInterval(timer); });
 
     <!-- 周视图网格 -->
     <div class="page-card">
-      <el-table :data="sections" border size="small" style="width: 100%">
+      <div class="table-scroll">
+        <el-table :data="sections" border size="small" style="min-width: 900px; width: 100%">
         <el-table-column label="节次 / 时间" width="110" fixed>
           <template #default="{ row }">
             <b>{{ row.no }}</b> <span class="muted">{{ row.time }}</span>
@@ -218,6 +219,7 @@ onUnmounted(() => { if (timer) clearInterval(timer); });
           </template>
         </el-table-column>
       </el-table>
+      </div>
     </div>
 
     <!-- 新增/编辑弹窗 -->
@@ -229,7 +231,7 @@ onUnmounted(() => { if (timer) clearInterval(timer); });
           </el-select>
         </el-form-item>
         <el-form-item label="星期">
-          <el-radio-group v-model="form.weekday">
+          <el-radio-group v-model="form.weekday" class="weekdays">
             <el-radio-button v-for="(w, i) in WEEK_LABEL" :key="i" :value="i">{{ w }}</el-radio-button>
           </el-radio-group>
         </el-form-item>

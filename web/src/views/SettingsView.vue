@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import {
-  getSettings, saveSettings, createBackup, getBackups, deleteBackup, backupDownloadUrl
+  getSettings, saveSettings, createBackup, getBackups, deleteBackup, backupDownloadUrl, getNetworkInfo
 } from '../api/index.js';
 import http from '../api/index.js';
 
@@ -11,6 +11,7 @@ const aiForm = ref({ provider: 'deepseek', apiKey: '', model: 'deepseek-chat', b
 const majors = ref([]);
 const newMajor = ref('');
 const sectionTimesText = ref('');
+const network = ref({ list: [], port: 3001 });
 const DEFAULT_SECTION_TIMES = JSON.stringify([
   ['1', '08:00-08:45'], ['2', '08:55-09:40'], ['3', '10:00-10:45'], ['4', '10:55-11:40'],
   ['5', '14:00-14:45'], ['6', '14:55-15:40'], ['7', '16:00-16:45'], ['8', '16:55-17:40'],
@@ -33,7 +34,14 @@ async function load() {
   majors.value = [...(s.majors || [])];
   sectionTimesText.value = JSON.stringify(s.sectionTimes || [], null, 2);
   backups.value = await getBackups();
+  try {
+    network.value = await getNetworkInfo();
+  } catch { /* 忽略 */ }
 }
+
+const accessUrls = computed(() =>
+  network.value.list.map((n) => ({ addr: n.address, url: `http://${n.address}:${network.value.port}` }))
+);
 
 async function saveAi() {
   const payload = { ai: { ...aiForm.value } };
@@ -108,12 +116,21 @@ function download(url) {
   a.href = url; a.click();
 }
 
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    ElMessage.success('已复制');
+  } catch {
+    ElMessage.warning('复制失败，请长按手动复制');
+  }
+}
+
 onMounted(load);
 </script>
 
 <template>
   <el-row :gutter="14">
-    <el-col :span="12">
+    <el-col :xs="24" :md="12">
       <!-- AI 设置 -->
       <div class="page-card" style="margin-bottom: 14px;">
         <h3 class="page-title">🤖 AI 模型设置（DeepSeek）</h3>
@@ -168,7 +185,20 @@ onMounted(load);
       </div>
     </el-col>
 
-    <el-col :span="12">
+    <el-col :xs="24" :md="12">
+      <!-- 手机访问 -->
+      <div class="page-card" style="margin-bottom: 14px;">
+        <h3 class="page-title">📱 手机访问本系统</h3>
+        <p class="muted" style="margin-top: 0">让手机与电脑连接同一个 WiFi，然后在手机浏览器打开下面的地址（电脑需保持本系统运行）：</p>
+        <div v-for="u in accessUrls" :key="u.addr" class="access-item">
+          <b>{{ u.url }}</b>
+          <el-button size="small" text type="primary" @click="copyText(u.url)">复制</el-button>
+        </div>
+        <el-empty v-if="!accessUrls.length" description="未检测到局域网地址" :image-size="40" />
+        <el-alert style="margin-top: 8px" type="warning" :closable="false"
+          title="若手机打不开：请检查 Windows 防火墙是否放行 3001 端口（需以管理员运行：netsh advfirewall firewall add rule name=teachAid dir=in action=allow protocol=TCP localport=3001）" />
+      </div>
+
       <!-- 专业配置 -->
       <div class="page-card" style="margin-bottom: 14px;">
         <h3 class="page-title">🎓 预置专业（AI 生成时选用）</h3>
@@ -204,4 +234,8 @@ onMounted(load);
 
 <style scoped>
 .tag-box { margin-bottom: 8px; }
+.access-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #f4f4f5; border-radius: 6px; padding: 8px 12px; margin-bottom: 8px;
+}
 </style>

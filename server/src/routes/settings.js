@@ -1,7 +1,22 @@
 import { Router } from 'express';
+import os from 'node:os';
 import { db, getSetting, setSetting } from '../db.js';
 
 const router = Router();
+
+/** 局域网访问地址（供手机/平板访问本机服务） */
+router.get('/network', (req, res) => {
+  const list = [];
+  const ifs = os.networkInterfaces();
+  for (const name of Object.keys(ifs)) {
+    for (const info of ifs[name] || []) {
+      if (info.family === 'IPv4' && !info.internal) {
+        list.push({ name, address: info.address });
+      }
+    }
+  }
+  res.json({ list, port: Number(process.env.PORT || 3001) });
+});
 
 /** 返回设置（API Key 打码） */
 router.get('/', (req, res) => {

@@ -146,7 +146,7 @@ onMounted(loadCourses);
 
 <template>
   <el-row :gutter="14">
-    <el-col :span="8">
+    <el-col :xs="24" :md="8">
       <div class="page-card">
         <h3 class="page-title">⚙️ 出题配置</h3>
         <el-form label-width="80px">
@@ -208,7 +208,7 @@ onMounted(loadCourses);
       </div>
     </el-col>
 
-    <el-col :span="16">
+    <el-col :xs="24" :md="16">
       <div class="page-card" v-loading="generating">
         <div class="toolbar">
           <h3 class="page-title" style="margin:0">📝 生成结果</h3>

@@ -72,6 +72,7 @@ export const importBankItems = (items) => http.post('/bank/import', { items });
 // ---------- 设置 ----------
 export const getSettings = () => http.get('/settings');
 export const saveSettings = (data) => http.put('/settings', data);
+export const getNetworkInfo = () => http.get('/settings/network');
 
 // ---------- 导出 / 备份 ----------
 export const exportProgressUrl = (courseId, format) => `/api/export/progress?course_id=${courseId}&format=${format}`;

@@ -120,30 +120,32 @@ onMounted(loadCourses);
       <el-button type="primary" @click="openAdd">＋ 收录题目（错题）</el-button>
     </div>
 
-    <el-table :data="items" v-loading="loading" border size="small">
-      <el-table-column label="题目" min-width="300">
-        <template #default="{ row }"><MathText :text="row.question" :clamp="2" /></template>
-      </el-table-column>
-      <el-table-column label="难度" width="80">
-        <template #default="{ row }"><el-tag size="small" :type="DIFF_TYPE[row.difficulty]">{{ DIFF_LABEL[row.difficulty] }}</el-tag></template>
-      </el-table-column>
-      <el-table-column label="题型" width="80">
-        <template #default="{ row }"><el-tag size="small" type="info">{{ TYPE_LABEL[row.type] }}</el-tag></template>
-      </el-table-column>
-      <el-table-column prop="source" label="来源" width="140" show-overflow-tooltip />
-      <el-table-column label="错题" width="70">
-        <template #default="{ row }">
-          <el-tag v-if="row.is_mistake" size="small" type="danger">错题</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="180">
-        <template #default="{ row }">
-          <el-button size="small" text type="primary" @click="openEdit(row)">编辑</el-button>
-          <el-button size="small" text @click="copyOne(row)">复制</el-button>
-          <el-button size="small" text type="danger" @click="remove(row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="table-scroll">
+      <el-table :data="items" v-loading="loading" border size="small" style="min-width: 820px; width: 100%">
+        <el-table-column label="题目" min-width="300">
+          <template #default="{ row }"><MathText :text="row.question" :clamp="2" /></template>
+        </el-table-column>
+        <el-table-column label="难度" width="80">
+          <template #default="{ row }"><el-tag size="small" :type="DIFF_TYPE[row.difficulty]">{{ DIFF_LABEL[row.difficulty] }}</el-tag></template>
+        </el-table-column>
+        <el-table-column label="题型" width="80">
+          <template #default="{ row }"><el-tag size="small" type="info">{{ TYPE_LABEL[row.type] }}</el-tag></template>
+        </el-table-column>
+        <el-table-column prop="source" label="来源" width="140" show-overflow-tooltip />
+        <el-table-column label="错题" width="70">
+          <template #default="{ row }">
+            <el-tag v-if="row.is_mistake" size="small" type="danger">错题</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180">
+          <template #default="{ row }">
+            <el-button size="small" text type="primary" @click="openEdit(row)">编辑</el-button>
+            <el-button size="small" text @click="copyOne(row)">复制</el-button>
+            <el-button size="small" text type="danger" @click="remove(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
     <el-empty v-if="!items.length && !loading" description="题库为空，可从「习题生成」页一键存入，或手动收录高频错题" />
 
     <!-- 新增/编辑 -->

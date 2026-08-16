@@ -120,7 +120,7 @@ onMounted(loadCourses);
 
 <template>
   <el-row :gutter="14">
-    <el-col :span="9">
+    <el-col :xs="24" :md="9">
       <!-- 生成配置 -->
       <div class="page-card">
         <h3 class="page-title">⚙️ 生成配置</h3>
@@ -163,7 +163,7 @@ onMounted(loadCourses);
       </div>
     </el-col>
 
-    <el-col :span="15">
+    <el-col :xs="24" :md="15">
       <!-- 生成结果 -->
       <div class="page-card" style="margin-bottom: 14px;">
         <div class="toolbar">

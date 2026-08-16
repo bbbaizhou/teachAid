@@ -6,3 +6,25 @@ body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f
 .toolbar .spacer { flex: 1; }
 .muted { color: #909399; font-size: 12px; }
 .pointer { cursor: pointer; }
+
+/* 表格横滚容器（移动端使用） */
+.table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ---------- 移动端适配 ---------- */
+@media (max-width: 767px) {
+  .page-card { padding: 12px; border-radius: 6px; }
+  .el-main { padding: 10px !important; }
+  .page-title { font-size: 16px; margin-bottom: 10px; }
+  .toolbar { gap: 8px; margin-bottom: 10px; }
+  .el-header { padding: 0 10px !important; }
+  .header-date { display: none; }
+  /* 弹窗 / 消息框 / 抽屉全屏化 */
+  .el-dialog { --el-dialog-width: 92% !important; width: 92% !important; max-width: 92% !important; }
+  .el-message-box { width: 88% !important; max-width: 88% !important; }
+  .el-drawer { --el-drawer-size: 88% !important; --el-drawer-width: 88% !important; width: 88% !important; max-width: 88% !important; }
+  /* 输入控件加大触控 */
+  .el-input__inner, .el-textarea__inner { font-size: 15px; }
+  .el-button { -webkit-tap-highlight-color: transparent; }
+  /* 课表星期选择换行 */
+  .el-radio-group.weekdays { display: flex; flex-wrap: wrap; row-gap: 6px; }
+}

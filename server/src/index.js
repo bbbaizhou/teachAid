@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import archiver from 'archiver';
@@ -64,5 +65,16 @@ function autoBackupIfNeeded() {
 app.listen(PORT, () => {
   console.log(`[teachAid] 后端服务已启动: http://localhost:${PORT}`);
   console.log(`[teachAid] 数据目录: ${DATA_DIR}`);
+  // 手机访问地址提示
+  const ifs = os.networkInterfaces();
+  const lan = [];
+  for (const name of Object.keys(ifs)) {
+    for (const info of ifs[name] || []) {
+      if (info.family === 'IPv4' && !info.internal) lan.push(info.address);
+    }
+  }
+  if (lan.length) {
+    console.log(`[teachAid] 📱 手机访问（同一 WiFi）：http://${lan[0]}:${PORT}`);
+  }
   autoBackupIfNeeded();
 });
